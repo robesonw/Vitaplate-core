@@ -1,0 +1,43 @@
+{
+  "name": "VitaPlate",
+  "short_name": "VitaPlate",
+  "description": "Smart Nutrition & Meal Planning Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "food", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Log Meal",
+      "url": "/NutritionTracking",
+      "description": "Quickly log a meal"
+    },
+    {
+      "name": "Meal Plans",
+      "url": "/MealPlans",
+      "description": "View your meal plans"
+    },
+    {
+      "name": "Grocery List",
+      "url": "/GroceryLists",
+      "description": "View grocery list"
+    }
+  ]
+}

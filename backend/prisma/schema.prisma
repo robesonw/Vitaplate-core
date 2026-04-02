@@ -1,0 +1,349 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  createdDate       DateTime  @default(now()) @map("created_date")
+  updatedDate       DateTime  @updatedAt @map("updated_date")
+  email             String    @unique
+  fullName          String?   @map("full_name")
+  role              Role      @default(user)
+  weeklyDigestEnabled Boolean @default(true) @map("weekly_digest_enabled")
+
+  preferences       UserPreferences?
+  settings          UserSettings?
+  mealPlans         MealPlan[]
+  labResults        LabResult[]
+  coachMessages     CoachMessage[]
+  progressEntries   ProgressEntry[]
+  dailyCheckIns     DailyCheckIn[]
+  nutritionLogs     NutritionLog[]
+  groceryLists      GroceryList[]
+  weightLogs        WeightLog[]
+  healthAlerts      HealthAlert[]
+  notifications     Notification[]
+  streaks           UserStreak?
+  badges            UserBadge[]
+  pantryItems       PantryItem[]
+
+  @@map("users")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum SubscriptionPlan {
+  free
+  pro
+  premium
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  inactive
+}
+
+model UserPreferences {
+  id                  String   @id @default(uuid())
+  createdDate         DateTime @default(now()) @map("created_date")
+  updatedDate         DateTime @updatedAt @map("updated_date")
+  userId              String   @unique @map("user_id")
+  age                 Int?
+  gender              String?
+  height              Float?
+  weight              Float?
+  healthGoal          String?  @map("health_goal")
+  dietaryRestrictions String?  @map("dietary_restrictions")
+  foodsLiked          String?  @map("foods_liked")
+  foodsAvoided        String?  @map("foods_avoided")
+  allergens           Json     @default("[]")
+  cuisinePreferences  Json     @default("[]") @map("cuisine_preferences")
+  cookingTime         String   @default("any") @map("cooking_time")
+  skillLevel          String   @default("intermediate") @map("skill_level")
+  numPeople           Int      @default(1) @map("num_people")
+  weeklyBudget        Float    @default(100) @map("weekly_budget")
+  diabetesType        String?  @map("diabetes_type")
+  heartCondition      String?  @map("heart_condition")
+  kidneyStage         String?  @map("kidney_stage")
+  thyroidCondition    String?  @map("thyroid_condition")
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model UserSettings {
+  id                     String           @id @default(uuid())
+  createdDate            DateTime         @default(now()) @map("created_date")
+  updatedDate            DateTime         @updatedAt @map("updated_date")
+  userId                 String           @unique @map("user_id")
+  subscriptionPlan       SubscriptionPlan @default(free) @map("subscription_plan")
+  subscriptionStatus     SubscriptionStatus @default(inactive) @map("subscription_status")
+  stripeCustomerId       String?          @map("stripe_customer_id")
+  stripeSubscriptionId   String?          @map("stripe_subscription_id")
+  aiCreditsUsed          Int              @default(0) @map("ai_credits_used")
+  aiCreditsLimit         Int              @default(1) @map("ai_credits_limit")
+  lastCreditReset        DateTime         @default(now()) @map("last_credit_reset")
+  emailNotifications     Boolean          @default(true) @map("email_notifications")
+  weeklyDigest           Boolean          @default(true) @map("weekly_digest")
+  affiliateCode          String?          @unique @map("affiliate_code")
+  referredBy             String?          @map("referred_by")
+
+  user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model MealPlan {
+  id              String   @id @default(uuid())
+  createdDate     DateTime @default(now()) @map("created_date")
+  updatedDate     DateTime @updatedAt @map("updated_date")
+  userId          String   @map("user_id")
+  name            String
+  dietType        String   @map("diet_type")
+  culturalStyle   String?  @map("cultural_style")
+  lifeStage       String?  @default("general") @map("life_stage")
+  days            Json     @default("[]")
+  preferences     Json     @default("{}")
+  macros          Json     @default("{}")
+  estimatedCost   Float?   @map("estimated_cost")
+  currentTotalCost Float?  @map("current_total_cost")
+  groceryList     Json?    @map("grocery_list")
+  heroImageUrl    String?  @map("hero_image_url")
+  profileHash     String?  @map("profile_hash")
+  fromTemplate    Boolean  @default(false) @map("from_template")
+  isShared        Boolean  @default(false) @map("is_shared")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([profileHash])
+  @@map("meal_plans")
+}
+
+model LabResult {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  updatedDate DateTime @updatedAt @map("updated_date")
+  userId      String   @map("user_id")
+  uploadDate  String   @map("upload_date")
+  fileUrl     String?  @map("file_url")
+  biomarkers  Json     @default("{}")
+  notes       String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("lab_results")
+}
+
+model CoachMessage {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  userId      String   @map("user_id")
+  role        String   // 'user' | 'assistant'
+  message     String   @db.Text
+  tokensUsed  Int?     @map("tokens_used")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("coach_messages")
+}
+
+model ProgressEntry {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  updatedDate DateTime @updatedAt @map("updated_date")
+  userId      String   @map("user_id")
+  weight      Float?
+  bodyFat     Float?   @map("body_fat")
+  energy      Int?
+  mood        Int?
+  notes       String?
+  logDate     String   @map("log_date")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("progress_entries")
+}
+
+model DailyCheckIn {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  userId      String   @map("user_id")
+  checkInDate String   @map("check_in_date")
+  mood        Int?
+  energy      Int?
+  sleep       Float?
+  water       Float?
+  notes       String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("daily_check_ins")
+}
+
+model NutritionLog {
+  id             String   @id @default(uuid())
+  createdDate    DateTime @default(now()) @map("created_date")
+  updatedDate    DateTime @updatedAt @map("updated_date")
+  userId         String   @map("user_id")
+  logDate        String   @map("log_date")
+  mealType       String?  @map("meal_type")
+  foodName       String?  @map("food_name")
+  calories       Float?
+  protein        Float?
+  carbs          Float?
+  fat            Float?
+  fiber          Float?
+  sodium         Float?
+  micronutrients Json     @default("{}") @map("micro_nutrients")
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("nutrition_logs")
+}
+
+model GroceryList {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  updatedDate DateTime @updatedAt @map("updated_date")
+  userId      String   @map("user_id")
+  mealPlanId  String?  @map("meal_plan_id")
+  name        String
+  items       Json     @default("[]")
+  totalCost   Float?   @map("total_cost")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("grocery_lists")
+}
+
+model WeightLog {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  userId      String   @map("user_id")
+  weight      Float
+  logDate     String   @map("log_date")
+  notes       String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("weight_logs")
+}
+
+model HealthAlert {
+  id                String   @id @default(uuid())
+  createdDate       DateTime @default(now()) @map("created_date")
+  userId            String   @map("user_id")
+  alertType         String   @map("alert_type")
+  severity          String   // 'urgent' | 'warning' | 'advisory'
+  message           String   @db.Text
+  currentMetric     String?  @map("current_metric")
+  recommendedAction String?  @db.Text @map("recommended_action")
+  suggestedFoods    Json     @default("[]") @map("suggested_foods")
+  labReference      Json?    @map("lab_reference")
+  predictedDirection String? @map("predicted_direction")
+  acknowledged      Boolean  @default(false)
+  emailSent         Boolean  @default(false) @map("email_sent")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("health_alerts")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  userId      String   @map("user_id")
+  type        String
+  title       String
+  message     String   @db.Text
+  actionUrl   String?  @map("action_url")
+  read        Boolean  @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model UserStreak {
+  id              String   @id @default(uuid())
+  createdDate     DateTime @default(now()) @map("created_date")
+  updatedDate     DateTime @updatedAt @map("updated_date")
+  userId          String   @unique @map("user_id")
+  currentStreak   Int      @default(0) @map("current_streak")
+  longestStreak   Int      @default(0) @map("longest_streak")
+  lastCheckIn     String?  @map("last_check_in")
+  totalPoints     Int      @default(0) @map("total_points")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_streaks")
+}
+
+model UserBadge {
+  id          String   @id @default(uuid())
+  createdDate DateTime @default(now()) @map("created_date")
+  userId      String   @map("user_id")
+  badgeId     String   @map("badge_id")
+  badgeName   String   @map("badge_name")
+  earnedAt    DateTime @default(now()) @map("earned_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_badges")
+}
+
+model PantryItem {
+  id           String   @id @default(uuid())
+  createdDate  DateTime @default(now()) @map("created_date")
+  updatedDate  DateTime @updatedAt @map("updated_date")
+  userId       String   @map("user_id")
+  name         String
+  category     String?
+  quantity     Float?
+  unit         String?
+  expiryDate   String?  @map("expiry_date")
+  barcode      String?
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("pantry_items")
+}
+
+model MealPlanTemplate {
+  id            String   @id @default(uuid())
+  createdDate   DateTime @default(now()) @map("created_date")
+  profileHash   String   @unique @map("profile_hash")
+  conditions    Json     @default("[]")
+  biomarkerBuckets Json  @default("{}") @map("biomarker_buckets")
+  dietType      String   @map("diet_type")
+  plan          Json
+  useCount      Int      @default(0) @map("use_count")
+  reviewedByRd  Boolean  @default(false) @map("reviewed_by_rd")
+
+  @@index([profileHash])
+  @@map("meal_plan_templates")
+}
