@@ -1,8 +1,9 @@
 {
   "$schema": "https://schema.railway.app/railpack-schema.json",
+  "build": {
+    "buildCommand": "npm run build"
+  },
   "deploy": {
-    "startCommand": "serve dist -s -l ${PORT:-3000}",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 60
+    "startCommand": "node server.js"
   }
 }
