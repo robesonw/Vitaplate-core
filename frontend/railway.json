@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.railway.app/railpack-schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npx serve dist -s -l 3000",
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
