@@ -2,8 +2,5 @@
   "$schema": "https://schema.railway.app/railpack-schema.json",
   "build": {
     "buildCommand": "npm run build"
-  },
-  "deploy": {
-    "startCommand": "node server.js"
   }
 }

@@ -8,9 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview --host 0.0.0.0 --port 3000",
-    "start": "node server.js"
+    "typecheck": "tsc -p ./jsconfig.json"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
@@ -100,6 +98,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "main": "server.js"
+  }
 }
