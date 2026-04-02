@@ -1,0 +1,108 @@
+version: '3.9'
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: vitaplate_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vitaplate
+      POSTGRES_PASSWORD: vitaplate_secret
+      POSTGRES_DB: vitaplate
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vitaplate -d vitaplate"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: vitaplate_redis
+    restart: unless-stopped
+    command: redis-server --requirepass vitaplate_redis_secret --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "vitaplate_redis_secret", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Backend API ─────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vitaplate_backend
+    restart: unless-stopped
+    env_file: ./backend/.env.local
+    environment:
+      DATABASE_URL: postgresql://vitaplate:vitaplate_secret@postgres:5432/vitaplate
+      REDIS_URL: redis://:vitaplate_redis_secret@redis:6379
+      NODE_ENV: development
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src          # hot-reload source
+      - ./backend/prisma:/app/prisma    # schema changes
+      - /app/node_modules               # keep container's node_modules
+    command: sh -c "npx prisma db push --skip-generate && node --watch src/index.js"
+
+  # ── Frontend ────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vitaplate_frontend
+    restart: unless-stopped
+    env_file: ./frontend/.env.local
+    environment:
+      VITE_API_URL: http://localhost:3001
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src         # hot-reload source
+      - ./frontend/public:/app/public
+      - /app/node_modules
+
+  # ── Prisma Studio (DB GUI) ──────────────────────────────────────────────────
+  prisma-studio:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vitaplate_prisma_studio
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://vitaplate:vitaplate_secret@postgres:5432/vitaplate
+    ports:
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/prisma:/app/prisma
+      - /app/node_modules
+    command: npx prisma studio --port 5555 --browser none
+    profiles:
+      - tools   # only starts with: docker compose --profile tools up
+
+volumes:
+  postgres_data:
+  redis_data:

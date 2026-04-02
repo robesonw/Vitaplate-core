@@ -169,3 +169,106 @@ This costs ~$5-10 once and saves hundreds in AI costs. Users with matching bioma
 
 Built on top of [culinary-compass](https://github.com/robesonw/culinary-compass) — a Base44 application.
 Migrated to a fully self-hosted stack with enhanced AI cost optimization.
+
+---
+
+## Docker Local Deployment
+
+The fastest way to run VitaPlate locally — Postgres, Redis, backend, and frontend all spin up together.
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- That's it
+
+### 1. Fill in your secrets
+
+```bash
+# Backend — only fill in the 4 marked secrets (DB + Redis are pre-configured)
+nano backend/.env.local
+
+# Frontend — fill in Supabase URL + anon key
+nano frontend/.env.local
+```
+
+Minimum required to boot:
+| File | Variable | Where to get it |
+|---|---|---|
+| `backend/.env.local` | `SUPABASE_URL` | supabase.com → project → Settings → API |
+| `backend/.env.local` | `SUPABASE_SERVICE_ROLE_KEY` | same page |
+| `backend/.env.local` | `ANTHROPIC_API_KEY` | console.anthropic.com |
+| `frontend/.env.local` | `VITE_SUPABASE_URL` | same as above |
+| `frontend/.env.local` | `VITE_SUPABASE_ANON_KEY` | supabase.com → project → Settings → API |
+
+Stripe + Resend can be added later — the app boots without them.
+
+### 2. Start everything
+
+```bash
+make up
+```
+
+That's it. Docker will:
+- Pull Postgres 16 + Redis 7
+- Build backend and frontend images
+- Run `prisma db push` to create all tables
+- Start hot-reload dev servers
+
+### 3. Open the app
+
+| Service | URL |
+|---|---|
+| **Frontend** | http://localhost:5173 |
+| **Backend API** | http://localhost:3001 |
+| **Health check** | http://localhost:3001/health |
+| **DB Studio** | `make db-studio` → http://localhost:5555 |
+
+### Common Commands
+
+```bash
+make up              # Start all services
+make down            # Stop all services
+make logs            # Watch live logs
+make logs-backend    # Backend logs only
+make restart         # Restart backend (after code changes if hot-reload misses)
+make db-studio       # Open Prisma Studio (visual DB browser)
+make seed            # Pre-generate meal plan templates (~$8 one-time)
+make shell-backend   # SSH into backend container
+make shell-db        # Open psql prompt
+make reset           # Nuke DB and start fresh (⚠️ destroys data)
+make status          # See container health
+```
+
+### Architecture (local docker)
+
+```
+Browser
+  │
+  ├─ http://localhost:5173  ──► frontend (Vite dev server, hot-reload)
+  │                                │
+  └─ http://localhost:3001  ──► backend (Node + Express, hot-reload)
+                                   │
+                      ┌────────────┴────────────┐
+                      ▼                         ▼
+              postgres:5432             redis:6379
+          (vitaplate database)      (plan cache + sessions)
+```
+
+### After first boot
+
+```bash
+# Seed meal plan templates (run once — costs ~$8 in AI, saves hundreds)
+make seed
+
+# Browse your database visually
+make db-studio
+```
+
+### Stripe webhook in local dev
+
+To test Stripe payments locally, use the Stripe CLI:
+
+```bash
+stripe listen --forward-to localhost:3001/api/stripe/webhook
+```
+
+Copy the webhook secret it prints → paste into `STRIPE_WEBHOOK_SECRET` in `backend/.env.local` → `make restart`
