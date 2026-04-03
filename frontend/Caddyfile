@@ -1,0 +1,16 @@
+:{$PORT:3000}
+
+root * /app/dist
+
+encode gzip
+
+# SPA fallback — all unmatched routes serve index.html so React Router works
+try_files {path} /index.html
+
+file_server
+
+# Long cache for Vite hashed assets
+@assets {
+    path /assets/*
+}
+header @assets Cache-Control "public, max-age=31536000, immutable"
