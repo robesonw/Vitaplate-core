@@ -28,6 +28,7 @@ import HealthAlerts from './pages/HealthAlerts';
 import Settings from './pages/Settings';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import LoginPage from '@/pages/LoginPage';
 import { usePageTitle } from '@/lib/usePageTitle';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -55,9 +56,7 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
+      return <LoginPage />;
     }
   }
 
