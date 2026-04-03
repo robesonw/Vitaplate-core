@@ -88,7 +88,7 @@ export default function CreatePlanDialog({ open, onOpenChange }) {
       const generatedPlanName = planName || `Custom AI Plan - ${new Date().toLocaleDateString()}`;
 
       try {
-        const res = await fetch('https://torez-00913626.base44.app/functions/generateMealPlan', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/meal-plans/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

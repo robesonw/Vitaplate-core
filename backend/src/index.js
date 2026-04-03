@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 
 // Import routes synchronously — no async, no race condition
 import mealPlansRouter from './routes/mealPlans.js';
+import aiRouter from './routes/ai.js';
 import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
 import {
@@ -69,6 +70,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISO
 
 // ─── Routes — registered synchronously at startup ────────────────────────────
 app.use('/api/meal-plans',    mealPlansRouter);
+app.use('/api/ai',            aiRouter);
 app.use('/api/coach',         coachRouter);
 app.use('/api/stripe',        stripeRouter);
 app.use('/api/labs',          labRouter);
