@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.railway.app/railpack-schema.json",
   "deploy": {
-    "startCommand": "npx prisma db push --skip-generate && node src/index.js",
+    "startCommand": "node src/index.js",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 120
+    "healthcheckTimeout": 60
   }
 }
