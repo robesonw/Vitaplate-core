@@ -43,6 +43,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
+// ─── Disable caching on all API routes ───────────────────────────────────────
+app.use('/api/', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  next();
+});
+
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
@@ -102,3 +110,4 @@ process.on('SIGTERM', () => {
 });
 
 export default app;
+// This line intentionally left blank
