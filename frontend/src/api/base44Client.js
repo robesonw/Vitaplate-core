@@ -59,7 +59,14 @@ export const auth = {
 export const entities = {
   // ── Fully implemented ────────────────────────────────────────────────────────
   MealPlan:        { list: () => get('/api/meal-plans'), filter: () => get('/api/meal-plans'), create: d => post('/api/meal-plans', d), update: (id, d) => put(`/api/meal-plans/${id}`, d), delete: id => del(`/api/meal-plans/${id}`) },
-  LabResult:       { list: () => get('/api/labs'), filter: () => get('/api/labs'), create: d => post('/api/labs', d), update: (id, d) => put(`/api/labs/${id}`, d), delete: id => del(`/api/labs/${id}`) },
+  LabResult:       { 
+    list:   () => get('/api/labs'),
+    filter: () => get('/api/labs'),
+    create: d => post('/api/labs', d),
+    update: (id, d) => put(`/api/labs/${id}`, d),
+    delete: id => del(`/api/labs/${id}`),
+    trends: () => get('/api/labs/trends'),
+  },
   CoachMessage:    { list: () => get('/api/coach/messages'), filter: () => get('/api/coach/messages'), create: d => post('/api/coach/chat', d) },
   UserPreferences: { list: () => get('/api/user/preferences').then(r => r ? [r] : []), filter: () => get('/api/user/preferences').then(r => r ? [r] : []), create: d => put('/api/user/preferences', d), update: (_, d) => put('/api/user/preferences', d) },
   UserSettings:    { list: () => get('/api/user/settings').then(r => r ? [r] : []), filter: () => get('/api/user/settings').then(r => r ? [r] : []), create: d => put('/api/user/settings', d), update: (_, d) => put('/api/user/settings', d) },

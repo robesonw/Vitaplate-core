@@ -29,6 +29,7 @@ import Settings from './pages/Settings';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoginPage from '@/pages/LoginPage';
+import { PageErrorBoundary, ComponentErrorBoundary } from '@/components/ErrorBoundary';
 import { usePageTitle } from '@/lib/usePageTitle';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -81,27 +82,27 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Pricing" element={<LayoutWrapper currentPageName="Pricing"><Pricing /></LayoutWrapper>} />
+      <Route path="/Pricing" element={<PageErrorBoundary><LayoutWrapper currentPageName="Pricing"><Pricing /></LayoutWrapper></PageErrorBoundary>} />
       <Route path="/Onboarding" element={<Onboarding />} />
-      <Route path="/Pantry" element={<LayoutWrapper currentPageName="Pantry"><Pantry /></LayoutWrapper>} />
-      <Route path="/ProgressTracking" element={<LayoutWrapper currentPageName="ProgressTracking"><ProgressTracking /></LayoutWrapper>} />
-      <Route path="/RecipeImport" element={<LayoutWrapper currentPageName="RecipeImport"><RecipeImport /></LayoutWrapper>} />
-      <Route path="/AICoach" element={<LayoutWrapper currentPageName="AICoach"><AICoach /></LayoutWrapper>} />
-      <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><Integrations /></LayoutWrapper>} />
-      <Route path="/SupplementRecommendations" element={<LayoutWrapper currentPageName="SupplementRecommendations"><SupplementRecommendations /></LayoutWrapper>} />
-      <Route path="/MyProgress" element={<LayoutWrapper currentPageName="MyProgress"><MyProgress /></LayoutWrapper>} />
-      <Route path="/ReferFriend" element={<LayoutWrapper currentPageName="ReferFriend"><ReferAFriend /></LayoutWrapper>} />
+      <Route path="/Pantry" element={<PageErrorBoundary><LayoutWrapper currentPageName="Pantry"><Pantry /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/ProgressTracking" element={<PageErrorBoundary><LayoutWrapper currentPageName="ProgressTracking"><ProgressTracking /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/RecipeImport" element={<PageErrorBoundary><LayoutWrapper currentPageName="RecipeImport"><RecipeImport /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/AICoach" element={<PageErrorBoundary><LayoutWrapper currentPageName="AICoach"><AICoach /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/Integrations" element={<PageErrorBoundary><LayoutWrapper currentPageName="Integrations"><Integrations /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/SupplementRecommendations" element={<PageErrorBoundary><LayoutWrapper currentPageName="SupplementRecommendations"><SupplementRecommendations /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/MyProgress" element={<PageErrorBoundary><LayoutWrapper currentPageName="MyProgress"><MyProgress /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/ReferFriend" element={<PageErrorBoundary><LayoutWrapper currentPageName="ReferFriend"><ReferAFriend /></LayoutWrapper></PageErrorBoundary>} />
       <Route path="/refer/:code" element={<ReferralLanding />} />
       <Route path="/scorecard/:userId" element={<ScorecardView />} />
-      <Route path="/PractitionerPortal" element={<LayoutWrapper currentPageName="PractitionerPortal"><PractitionerPortal /></LayoutWrapper>} />
-      <Route path="/MyClients" element={<LayoutWrapper currentPageName="MyClients"><MyClients /></LayoutWrapper>} />
-      <Route path="/PractitionerPricing" element={<LayoutWrapper currentPageName="PractitionerPricing"><PractitionerPricing /></LayoutWrapper>} />
+      <Route path="/PractitionerPortal" element={<PageErrorBoundary><LayoutWrapper currentPageName="PractitionerPortal"><PractitionerPortal /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/MyClients" element={<PageErrorBoundary><LayoutWrapper currentPageName="MyClients"><MyClients /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/PractitionerPricing" element={<PageErrorBoundary><LayoutWrapper currentPageName="PractitionerPricing"><PractitionerPricing /></LayoutWrapper></PageErrorBoundary>} />
       <Route path="/practitioners" element={<PractitionerSignup />} />
-      <Route path="/FindPractitioner" element={<LayoutWrapper currentPageName="FindPractitioner"><FindPractitioner /></LayoutWrapper>} />
+      <Route path="/FindPractitioner" element={<PageErrorBoundary><LayoutWrapper currentPageName="FindPractitioner"><FindPractitioner /></LayoutWrapper></PageErrorBoundary>} />
       <Route path="/corporate" element={<CorporateSignup />} />
-      <Route path="/CorporateAdmin" element={<LayoutWrapper currentPageName="CorporateAdmin"><CorporateAdmin /></LayoutWrapper>} />
-      <Route path="/HealthAlerts" element={<LayoutWrapper currentPageName="HealthAlerts"><HealthAlerts /></LayoutWrapper>} />
-      <Route path="/MyProfile" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
+      <Route path="/CorporateAdmin" element={<PageErrorBoundary><LayoutWrapper currentPageName="CorporateAdmin"><CorporateAdmin /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/HealthAlerts" element={<PageErrorBoundary><LayoutWrapper currentPageName="HealthAlerts"><HealthAlerts /></LayoutWrapper></PageErrorBoundary>} />
+      <Route path="/MyProfile" element={<PageErrorBoundary><LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper></PageErrorBoundary>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     </>

@@ -8,10 +8,12 @@ import rateLimit from 'express-rate-limit';
 // Import routes synchronously — no async, no race condition
 import mealPlansRouter from './routes/mealPlans.js';
 import aiRouter from './routes/ai.js';
+import labsRouter from './routes/labs.js';
+import { ensureStorageBucket } from './services/labUpload.js';
 import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
 import {
-  labRouter, userRouter, progressRouter, notificationRouter,
+  userRouter, progressRouter, notificationRouter,
   checkInRouter, groceryRouter, pantryRouter, alertRouter,
 } from './routes/resources.js';
 
@@ -73,7 +75,7 @@ app.use('/api/meal-plans',    mealPlansRouter);
 app.use('/api/ai',            aiRouter);
 app.use('/api/coach',         coachRouter);
 app.use('/api/stripe',        stripeRouter);
-app.use('/api/labs',          labRouter);
+app.use('/api/labs',          labsRouter);
 app.use('/api/user',          userRouter);
 app.use('/api/progress',      progressRouter);
 app.use('/api/notifications', notificationRouter);
@@ -96,6 +98,9 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 async function connectDB() {
+  // Set up Supabase storage bucket for lab PDFs
+  try { await ensureStorageBucket(); } catch {}
+
   try {
     const { prisma } = await import('./lib/prisma.js');
     await prisma.$connect();

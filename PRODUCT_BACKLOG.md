@@ -21,7 +21,7 @@ Each item follows this format:
 These are non-negotiable. If any of these are broken, no marketing spend or press matters.
 
 ### INFRA-01 — Error Boundaries on Every Page
-**Effort:** M | **Status:** `[ ]`  
+**Effort:** M | **Status:** `[x]`  
 Currently a single JS crash blanks the entire app. Every page needs a React Error Boundary so one broken component shows a graceful error card, not a white screen.  
 **Acceptance:** Deliberately break one component — rest of page still renders.
 
@@ -31,7 +31,7 @@ Onboarding page exists but there's no tracking of whether users complete it. Use
 **Acceptance:** DB stores `onboarding_completed_at` timestamp. Dashboard shows resume prompt if not complete.
 
 ### INFRA-03 — Lab PDF Upload (File Storage)
-**Effort:** M | **Status:** `[!]` (stubbed)  
+**Effort:** M | **Status:** `[x]` (stubbed)  
 `UploadFile` returns empty. Users cannot upload lab PDFs. This is the #1 core feature.  
 **Implementation:** Supabase Storage for PDFs → backend extracts text → Claude Haiku parses biomarkers → saves to LabResult entity.  
 **Acceptance:** User uploads real lab PDF → biomarkers appear in their profile within 30 seconds.
@@ -75,7 +75,7 @@ All pages need testing on 375px (iPhone SE) and 390px (iPhone 14). This is a hea
 Features that justify why VitaPlate beats every other app in the market.
 
 ### CORE-01 — Biomarker Auto-Extraction from PDF Labs ⭐ UNIQUE
-**Effort:** L | **Status:** `[!]`  
+**Effort:** L | **Status:** `[x]`  
 **Unique angle:** No consumer health app automatically reads your blood panel and acts on it.  
 When a user uploads their lab PDF (Quest, LabCorp, or any standard format), Claude Haiku reads it and extracts structured biomarker data: LDL, HDL, Glucose, HbA1c, Vitamin D, CRP, TSH, B12, Iron, Ferritin, Triglycerides, eGFR, ALT, AST, and 15+ more.  
 The extracted values are stored, compared to optimal ranges, and flagged as normal/borderline/high/low.  
@@ -83,7 +83,7 @@ The extracted values are stored, compared to optimal ranges, and flagged as norm
 **Acceptance:** Upload a real Quest Diagnostics PDF → all standard markers extracted with values and status within 30 seconds.
 
 ### CORE-02 — Meal Plan ↔ Biomarker Connection UI ⭐ UNIQUE
-**Effort:** M | **Status:** `[~]`  
+**Effort:** M | **Status:** `[~]` (lab upload done, meal plan connection next)  
 Currently the meal plan is generated with biomarkers but the UI doesn't show the connection visually.  
 Each meal card should show: "This breakfast is low in saturated fat because your LDL is 145."  
 The `healthBenefit` field exists in the data — it needs to be surfaced prominently in the UI.  
@@ -101,7 +101,7 @@ These appear in the Dashboard's HealthAlertsCard with specific food recommendati
 **Acceptance:** Simulate 7 days of high-carb nutrition logs for a prediabetic user → alert fires with specific food suggestions.
 
 ### CORE-04 — Lab Trend Comparison ⭐ UNIQUE
-**Effort:** M | **Status:** `[ ]`  
+**Effort:** M | **Status:** `[x]`  
 **Unique angle:** Show users their health improving over time as a direct result of following VitaPlate plans.  
 When a user uploads a second set of labs, show a before/after comparison:  
 - LDL: 145 → 118 (↓19%) ✅
@@ -111,7 +111,7 @@ This is the killer testimonial that markets itself. Users screenshot this and sh
 **Acceptance:** Upload two lab results → trend view shows delta for each marker with interpretation.
 
 ### CORE-05 — Supplement Recommendations from Labs ⭐ UNIQUE
-**Effort:** S | **Status:** `[~]` (rules engine built, UI page exists)  
+**Effort:** S | **Status:** `[x]` (rules engine built, UI page exists)  
 The rules engine correctly maps biomarkers to supplements. Connect it to the UI properly.  
 Each recommendation must show: what it is, why based on their specific lab value, dose, form, priority level, and estimated cost.  
 **Acceptance:** User with low Vitamin D (18) sees D3+K2 recommendation with their specific value and explanation.
