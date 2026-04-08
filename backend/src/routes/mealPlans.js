@@ -9,6 +9,7 @@ import {
   swapMeal,
 } from '../services/ai.js';
 import { requireAuth } from '../middleware/auth.js';
+import { sendMealPlanReadyEmail, safeEmail } from '../services/email.js';
 
 const router = Router();
 
@@ -89,6 +90,16 @@ router.post('/generate', requireAuth, async (req, res) => {
         fromTemplate: generated.fromTemplate ?? false,
       },
     });
+
+    // 5b. Send meal plan ready email (non-blocking)
+    safeEmail(() => sendMealPlanReadyEmail({
+      to:             req.user.email,
+      name:           req.user.fullName,
+      planName:       mealPlan.name,
+      biomarkerCount: Object.keys(biomarkers || {}).length,
+      abnormalCount:  Object.values(biomarkers || {}).filter(v => v?.status !== 'normal').length,
+      dietType:       preferences?.dietType,
+    }));
 
     // 6. Cache user's plan
     await setCached(`mealplan:user:${req.userId}:${profileHash}`, mealPlan);

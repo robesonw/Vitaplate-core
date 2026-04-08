@@ -10,6 +10,7 @@ import mealPlansRouter from './routes/mealPlans.js';
 import aiRouter from './routes/ai.js';
 import labsRouter from './routes/labs.js';
 import { ensureStorageBucket } from './services/labUpload.js';
+import { startAllJobs } from './jobs/scheduler.js';
 import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
 import {
@@ -105,6 +106,7 @@ async function connectDB() {
     const { prisma } = await import('./lib/prisma.js');
     await prisma.$connect();
     console.log('✅ Database connected');
+    startAllJobs();
   } catch (err) {
     console.error('❌ DB connection failed:', err.message);
     console.error('   Check DATABASE_URL in Railway Variables');

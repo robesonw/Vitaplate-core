@@ -69,7 +69,12 @@ export const entities = {
   },
   CoachMessage:    { list: () => get('/api/coach/messages'), filter: () => get('/api/coach/messages'), create: d => post('/api/coach/chat', d) },
   UserPreferences: { list: () => get('/api/user/preferences').then(r => r ? [r] : []), filter: () => get('/api/user/preferences').then(r => r ? [r] : []), create: d => put('/api/user/preferences', d), update: (_, d) => put('/api/user/preferences', d) },
-  UserSettings:    { list: () => get('/api/user/settings').then(r => r ? [r] : []), filter: () => get('/api/user/settings').then(r => r ? [r] : []), create: d => put('/api/user/settings', d), update: (_, d) => put('/api/user/settings', d) },
+  UserSettings:    { 
+    list:   () => get('/api/user/settings').then(r => r ? [r] : []),
+    filter: () => get('/api/user/settings').then(r => r ? [r] : []),
+    create: d => put('/api/user/settings', d),
+    update: (_, d) => put('/api/user/settings', d),
+  },
   ProgressEntry:   { list: () => get('/api/progress'), filter: () => get('/api/progress'), create: d => post('/api/progress', d) },
   Notification:    { list: () => get('/api/notifications'), filter: () => get('/api/notifications'), update: (id, d) => put(`/api/notifications/${id}/read`, d) },
   DailyCheckIn:    { list: () => get('/api/check-ins'), filter: () => get('/api/check-ins'), create: d => post('/api/check-ins', d) },

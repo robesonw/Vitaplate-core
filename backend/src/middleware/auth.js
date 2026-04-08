@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { sendWelcomeEmail, safeEmail } from '../services/email.js';
 import { prisma } from '../lib/prisma.js';
 
 let supabase;
@@ -32,6 +33,10 @@ export async function requireAuth(req, res, next) {
     }
 
     // Upsert user in DB
+    // Track if this is a new user
+    const existingUser = await prisma.user.findUnique({ where: { email: user.email } });
+    const isNewUser = !existingUser;
+
     const dbUser = await prisma.user.upsert({
       where:  { email: user.email },
       create: {
@@ -50,6 +55,14 @@ export async function requireAuth(req, res, next) {
       update: {},
       include: { settings: true },
     });
+
+    // Send welcome email to new users (non-blocking)
+    if (isNewUser) {
+      safeEmail(() => sendWelcomeEmail({
+        to:   dbUser.email,
+        name: dbUser.fullName,
+      }));
+    }
 
     req.user   = dbUser;
     req.userId = dbUser.id;

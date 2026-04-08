@@ -137,14 +137,21 @@ export default function MealCard({ meal, mealType, mealIcon, mealPlanId, mealPla
           </div>
         )}
 
-        {/* Health Benefit */}
+        {/* Health Benefit + Biomarker Connection */}
         {meal.healthBenefit && (
           <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
             <div className="flex items-start gap-2">
               <Heart className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-              <div>
+              <div className="flex-1">
                 <p className="text-xs font-medium text-emerald-900 mb-0.5">Why This Helps</p>
                 <p className="text-xs text-emerald-700">{meal.healthBenefit}</p>
+                {meal.userBiomarkers && (
+                  <BiomarkerMealBadge
+                    mealName={meal.name}
+                    healthBenefit={meal.healthBenefit}
+                    userBiomarkers={meal.userBiomarkers}
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -56,6 +56,18 @@ export default function PlanDetailsView({ plan, open, onOpenChange, mealKitOffer
 
   const queryClient = useQueryClient();
 
+  // Load user's latest biomarkers to show meal-biomarker connections
+  const { data: latestLab } = useQuery({
+    queryKey: ['latestLab'],
+    queryFn:  async () => {
+      const labs = await base44.entities.LabResult.list();
+      return labs?.[0] || null;
+    },
+    retry: false,
+  });
+  const userBiomarkers = latestLab?.biomarkers || {};
+
+
   const { data: favoriteMeals = [] } = useQuery({
     queryKey: ['favoriteMeals'],
     queryFn: () => base44.entities.FavoriteMeal.list('-created_date'),

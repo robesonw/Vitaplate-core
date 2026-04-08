@@ -29,6 +29,7 @@ import ActivitySummaryCard from '../components/dashboard/ActivitySummaryCard';
 import VoiceMealLogger from '../components/meals/VoiceMealLogger';
 import VoiceTranscriptionReview from '../components/meals/VoiceTranscriptionReview';
 import { useSubscription } from '../lib/useSubscription';
+import { useOnboarding } from '../lib/useOnboarding';
 
 export default function Dashboard() {
   const [voiceReviewOpen, setVoiceReviewOpen] = useState(false);
@@ -44,6 +45,8 @@ export default function Dashboard() {
     queryFn: () => base44.auth.me(),
     retry: false,
   });
+
+  const { isComplete: onboardingComplete, currentStep } = useOnboarding();
 
   const { data: sharedPlans = [] } = useQuery({
     queryKey: ['sharedPlans'],
@@ -189,7 +192,23 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div>
+      {/* Onboarding Resume Banner */}
+      {!onboardingComplete && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🚀</span>
+            <div>
+              <p className="font-semibold">Complete your health profile to unlock personalized meal plans</p>
+              <p className="text-indigo-200 text-sm">Takes 3 minutes · Upload your labs · Get a meal plan built for your biomarkers</p>
+            </div>
+          </div>
+          <a href="/Onboarding" className="bg-white text-indigo-600 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-indigo-50 transition-colors flex-shrink-0 ml-4">
+            Continue Setup →
+          </a>
+        </div>
+      )}
+      <div className="space-y-6">
       <OnboardingTour />
       
       {/* Quick Start Checklist */}
@@ -470,6 +489,7 @@ export default function Dashboard() {
           }}
         />
       )}
+    </div>
     </div>
   );
 }

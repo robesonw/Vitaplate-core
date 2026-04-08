@@ -26,7 +26,7 @@ Currently a single JS crash blanks the entire app. Every page needs a React Erro
 **Acceptance:** Deliberately break one component — rest of page still renders.
 
 ### INFRA-02 — Onboarding Completion Tracking
-**Effort:** S | **Status:** `[~]`  
+**Effort:** S | **Status:** `[x]`  
 Onboarding page exists but there's no tracking of whether users complete it. Users who abandon onboarding never come back.  
 **Acceptance:** DB stores `onboarding_completed_at` timestamp. Dashboard shows resume prompt if not complete.
 
@@ -48,7 +48,7 @@ One-time: `node src/jobs/seedTemplates.js` generates 20 base plans for common bi
 **Acceptance:** `meal_plan_templates` table has 20+ rows. Matching profile hash serves from cache instantly.
 
 ### INFRA-06 — Transactional Emails (Resend)
-**Effort:** M | **Status:** `[ ]`  
+**Effort:** M | **Status:** `[x]`  
 No emails fire currently. Users who sign up hear nothing.  
 **Emails needed:**
 - Welcome (immediate on signup)
@@ -83,14 +83,14 @@ The extracted values are stored, compared to optimal ranges, and flagged as norm
 **Acceptance:** Upload a real Quest Diagnostics PDF → all standard markers extracted with values and status within 30 seconds.
 
 ### CORE-02 — Meal Plan ↔ Biomarker Connection UI ⭐ UNIQUE
-**Effort:** M | **Status:** `[~]` (lab upload done, meal plan connection next)  
+**Effort:** M | **Status:** `[x]`  
 Currently the meal plan is generated with biomarkers but the UI doesn't show the connection visually.  
 Each meal card should show: "This breakfast is low in saturated fat because your LDL is 145."  
 The `healthBenefit` field exists in the data — it needs to be surfaced prominently in the UI.  
 **Acceptance:** User views their meal plan and can see exactly why each meal was chosen for their specific biomarkers.
 
 ### CORE-03 — Predictive Health Alerts Engine ⭐ UNIQUE
-**Effort:** L | **Status:** `[~]` (rules exist, UI exists, not connected)  
+**Effort:** L | **Status:** `[x]` (rules exist, UI exists, not connected)  
 **Unique angle:** No app cross-references your eating patterns against your blood work to predict what's coming.  
 The alert engine (already built in backend) runs nightly and detects:
 - High saturated fat intake + elevated LDL → trending warning

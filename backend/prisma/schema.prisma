@@ -99,6 +99,8 @@ model UserSettings {
   weeklyDigest           Boolean          @default(true) @map("weekly_digest")
   affiliateCode          String?          @unique @map("affiliate_code")
   referredBy             String?          @map("referred_by")
+  onboardingCompletedAt  DateTime?        @map("onboarding_completed_at")
+  onboardingStep         String?          @map("onboarding_step")
 
   user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { processLabUpload } from '../services/labUpload.js';
 import { generateSupplementRecommendations } from '../services/ai.js';
+import { sendLabUploadConfirmation, safeEmail } from '../services/email.js';
 
 const router = Router();
 
@@ -46,6 +47,16 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
       userId:     req.userId,
       notes:      req.body.notes,
     });
+
+    // Send confirmation email (non-blocking)
+    safeEmail(() => sendLabUploadConfirmation({
+      to:             req.user.email,
+      name:           req.user.fullName,
+      biomarkerCount: result.biomarkerCount,
+      abnormalCount:  result.abnormal.length,
+      labDate:        result.labDate,
+      labProvider:    result.labProvider,
+    }));
 
     res.status(201).json({
       success:       true,

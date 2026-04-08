@@ -107,6 +107,33 @@ userRouter.put('/settings', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// Complete onboarding
+userRouter.post('/onboarding/complete', requireAuth, async (req, res) => {
+  try {
+    const settings = await prisma.userSettings.upsert({
+      where:  { userId: req.userId },
+      create: { userId: req.userId, onboardingCompletedAt: new Date() },
+      update: { onboardingCompletedAt: new Date(), onboardingStep: 'complete' },
+    });
+    res.json({ success: true, completedAt: settings.onboardingCompletedAt });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Update onboarding step
+userRouter.post('/onboarding/step', requireAuth, async (req, res) => {
+  try {
+    const { step } = req.body;
+    await prisma.userSettings.upsert({
+      where:  { userId: req.userId },
+      create: { userId: req.userId, onboardingStep: step },
+      update: { onboardingStep: step },
+    });
+    res.json({ success: true, step });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
 // ─── Progress ─────────────────────────────────────────────────────────────────
 export const progressRouter = Router();
 
