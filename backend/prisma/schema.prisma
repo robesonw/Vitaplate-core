@@ -247,6 +247,7 @@ model WeightLog {
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, logDate])
   @@index([userId])
   @@map("weight_logs")
 }

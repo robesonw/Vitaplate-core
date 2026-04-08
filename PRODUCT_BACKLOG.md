@@ -149,18 +149,18 @@ Every Monday morning, users receive a personalized digest:
 **Acceptance:** Digest fires Monday 8am. Contains real user data. Unsubscribe link works.
 
 ### RETAIN-03 — Meal Plan Calendar Sync
-**Effort:** M | **Status:** `[~]` (SyncToCalendarDialog exists)  
+**Effort:** M | **Status:** `[~]` (Google OAuth deferred — use Porkbun/DNS level) (SyncToCalendarDialog exists)  
 Connect to Google Calendar via OAuth. Each meal appears as an event on the correct day with prep time and ingredients as notes.  
 **Acceptance:** User syncs their 7-day plan → meals appear in Google Calendar as events with timing.
 
 ### RETAIN-04 — Grocery List with Price Estimates + Retailer Links
-**Effort:** M | **Status:** `[~]`  
+**Effort:** M | **Status:** `[x]`  
 Grocery list generates but price estimates and retailer links need connecting.  
 Add: estimated total cost per week, direct Instacart/Amazon Fresh links for the full list, category grouping (produce, proteins, dairy, pantry), check-off as you shop.  
 **Acceptance:** Generate grocery list → see estimated total → one-click sends to Instacart.
 
 ### RETAIN-05 — Progress Photos + Body Metrics Timeline
-**Effort:** M | **Status:** `[~]`  
+**Effort:** M | **Status:** `[x]`  
 ProgressTracking page exists. Add: weight trend chart (already built), body measurement tracking, before/after photo storage, correlation view (weight vs lab markers over time).  
 **Acceptance:** User logs weight for 30 days → chart shows trend with correlation to any lab value they choose.
 
@@ -188,14 +188,14 @@ Registered Dietitians and Nutritionists can:
 **Acceptance:** Nutritionist creates account → invites 3 clients → can view their labs and push plans → clients see plans in their dashboard.
 
 ### REVENUE-02 — Corporate Wellness Tier
-**Effort:** L | **Status:** `[~]` (CorporateAdmin page exists)  
+**Effort:** L | **Status:** `[x]` (CorporateAdmin page exists)  
 Companies pay $X/employee/month for team nutrition programs.  
 Simple MVP: HR admin creates company account → invites employees → gets aggregate (anonymized) team health dashboard → employees get Premium access.  
 **Pricing:** $8/employee/month (min 10 employees = $80/month).  
 **Acceptance:** Corporate admin creates account → invites 5 test employees → all get Pro access.
 
 ### REVENUE-03 — Affiliate/Meal Kit Integration
-**Effort:** S | **Status:** `[~]` (AffiliateOrderButtons exists)  
+**Effort:** S | **Status:** `[x]` (AffiliateOrderButtons exists)  
 When viewing a grocery list, offer: "Order this as a meal kit from HelloFresh" with affiliate tracking.  
 Also: Amazon affiliate links on supplement recommendations.  
 **Acceptance:** Click "Order as Meal Kit" → tracked affiliate link fires → AffiliateClick recorded in DB.

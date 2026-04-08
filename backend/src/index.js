@@ -12,13 +12,16 @@ import labsRouter from './routes/labs.js';
 import gamificationRouter from './routes/gamification.js';
 import referralRouter from './routes/referral.js';
 import practitionerRouter from './routes/practitioner.js';
+import groceryRouter from './routes/grocery.js';
+import progressRouterFull from './routes/progress.js';
+import corporateRouter from './routes/corporate.js';
 import { ensureStorageBucket } from './services/labUpload.js';
 import { startAllJobs } from './jobs/scheduler.js';
 import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
 import {
-  userRouter, progressRouter, notificationRouter,
-  checkInRouter, groceryRouter, pantryRouter, alertRouter,
+  userRouter, notificationRouter,
+  checkInRouter, pantryRouter, alertRouter,
 } from './routes/resources.js';
 
 const app  = express();
@@ -81,15 +84,16 @@ app.use('/api/coach',         coachRouter);
 app.use('/api/stripe',        stripeRouter);
 app.use('/api/labs',          labsRouter);
 app.use('/api/user',          userRouter);
-app.use('/api/progress',      progressRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/check-ins',     checkInRouter);
-app.use('/api/grocery-lists', groceryRouter);
 app.use('/api/pantry',        pantryRouter);
 app.use('/api/alerts',        alertRouter);
 app.use('/api/gamification',  gamificationRouter);
 app.use('/api/referral',      referralRouter);
 app.use('/api/practitioner',  practitionerRouter);
+app.use('/api/grocery-lists', groceryRouter);
+app.use('/api/progress',      progressRouterFull);
+app.use('/api/corporate',     corporateRouter);
 
 // ─── 404 + Error handler ──────────────────────────────────────────────────────
 app.use('*', (req, res) => res.status(404).json({ error: `${req.method} ${req.originalUrl} not found` }));
