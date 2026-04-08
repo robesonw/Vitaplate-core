@@ -9,6 +9,9 @@ import rateLimit from 'express-rate-limit';
 import mealPlansRouter from './routes/mealPlans.js';
 import aiRouter from './routes/ai.js';
 import labsRouter from './routes/labs.js';
+import gamificationRouter from './routes/gamification.js';
+import referralRouter from './routes/referral.js';
+import practitionerRouter from './routes/practitioner.js';
 import { ensureStorageBucket } from './services/labUpload.js';
 import { startAllJobs } from './jobs/scheduler.js';
 import coachRouter from './routes/coach.js';
@@ -84,6 +87,9 @@ app.use('/api/check-ins',     checkInRouter);
 app.use('/api/grocery-lists', groceryRouter);
 app.use('/api/pantry',        pantryRouter);
 app.use('/api/alerts',        alertRouter);
+app.use('/api/gamification',  gamificationRouter);
+app.use('/api/referral',      referralRouter);
+app.use('/api/practitioner',  practitionerRouter);
 
 // ─── 404 + Error handler ──────────────────────────────────────────────────────
 app.use('*', (req, res) => res.status(404).json({ error: `${req.method} ${req.originalUrl} not found` }));

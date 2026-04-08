@@ -133,7 +133,7 @@ Five condition hubs each need to feel like a specialist consultation, not a gene
 Features that make users stay and tell others.
 
 ### RETAIN-01 — Daily Check-In Streak with Gamification
-**Effort:** M | **Status:** `[~]`  
+**Effort:** M | **Status:** `[x]`  
 Streak tracking exists in DB. Needs: visual flame counter on dashboard, milestone celebrations (7 days, 30 days, 100 days), streak recovery option (1 freeze per month), leaderboard among users.  
 **Acceptance:** Check in 7 days in a row → animated celebration fires. Miss a day → freeze option offered.
 
@@ -165,7 +165,7 @@ ProgressTracking page exists. Add: weight trend chart (already built), body meas
 **Acceptance:** User logs weight for 30 days → chart shows trend with correlation to any lab value they choose.
 
 ### RETAIN-06 — Referral Program
-**Effort:** S | **Status:** `[~]` (ReferAFriend page exists)  
+**Effort:** S | **Status:** `[x]` (ReferAFriend page exists)  
 Users who refer a friend who subscribes get 1 free month of Pro. Simple, effective.  
 **Acceptance:** User generates referral link → friend signs up → original user's subscription extended by 1 month automatically.
 
@@ -174,7 +174,7 @@ Users who refer a friend who subscribes get 1 free month of Pro. Simple, effecti
 ## 🟢 P2 — Week 3-4 (New Revenue Streams)
 
 ### REVENUE-01 — Practitioner Portal ⭐ UNIQUE B2B CHANNEL
-**Effort:** L | **Status:** `[~]` (pages exist, backend partially built)  
+**Effort:** L | **Status:** `[x]` (pages exist, backend partially built)  
 **Unique angle:** No meal planning app has a clinical B2B tier.  
 Registered Dietitians and Nutritionists can:
 - Create accounts for their clients (invitation flow)

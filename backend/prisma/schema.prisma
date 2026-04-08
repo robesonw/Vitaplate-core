@@ -297,6 +297,8 @@ model UserStreak {
   longestStreak   Int      @default(0) @map("longest_streak")
   lastCheckIn     String?  @map("last_check_in")
   totalPoints     Int      @default(0) @map("total_points")
+  lastFreezeUsed  DateTime? @map("last_freeze_used")
+  freezesUsed     Int      @default(0) @map("freezes_used")
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
