@@ -1,5 +1,8 @@
 {
   "$schema": "https://schema.railway.app/railpack-schema.json",
+  "build": {
+    "buildCommand": "npm install && npx prisma generate"
+  },
   "deploy": {
     "startCommand": "node src/index.js",
     "healthcheckPath": "/health",

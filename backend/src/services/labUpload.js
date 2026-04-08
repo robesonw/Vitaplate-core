@@ -37,7 +37,7 @@ export async function uploadLabPDF(fileBuffer, fileName, userId) {
 export async function extractPDFText(buffer) {
   try {
     // Dynamic import to handle ESM/CJS issues
-    const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
+    const { default: pdfParse } = await import('pdf-parse');
     const data = await pdfParse(buffer);
     return data.text;
   } catch (err) {
