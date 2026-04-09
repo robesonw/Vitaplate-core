@@ -163,8 +163,17 @@ export const integrations = {
   Core: {
     InvokeLLM:     invokeLLM,
     SendEmail:     async (opts) => { console.log('Email stubbed:', opts?.subject); return { success: true }; },
-    UploadFile:    async (opts) => ({ file_url: '', success: false, message: 'File upload not configured' }),
-    GenerateImage: async (opts) => ({ url: '', success: false }),
+    UploadFile:    async (opts) => {
+      // File upload via this method not yet configured
+      // Lab PDFs use /api/labs/upload directly
+      console.log('UploadFile stubbed for:', opts?.file?.name);
+      return { file_url: '', success: false, message: 'Please use the dedicated upload in Lab Results' };
+    },
+    GenerateImage: async (opts) => {
+      // Image generation not yet configured — return placeholder
+      console.log('GenerateImage stubbed:', opts?.prompt?.slice(0, 50));
+      return { url: '', success: false, message: 'Image generation coming soon' };
+    },
   },
 };
 

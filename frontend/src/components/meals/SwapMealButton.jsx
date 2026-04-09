@@ -101,6 +101,7 @@ export default function SwapMealButton({
         ? `IMPORTANT: Do NOT suggest any of these meals that were recently used: ${avoidList.join(', ')}.`
         : '';
 
+      // Routes through /api/ai/invoke (Haiku model)
       const newMeal = await base44.integrations.Core.InvokeLLM({
         prompt: `Generate a DIFFERENT ${mealType} meal to replace "${meal?.name}" in a meal plan.
 Goal: ${healthGoal}

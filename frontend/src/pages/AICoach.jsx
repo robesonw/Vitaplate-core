@@ -228,11 +228,12 @@ Guidelines:
 - Always end with an actionable tip or question to keep the conversation going
 - If they don't have data (no labs, no meal plan), still give helpful general advice and suggest they set up their profile`;
 
-      const reply = await base44.integrations.Core.InvokeLLM({
-        prompt: `${systemPrompt}\n\nUser's new message: ${trimmed}\n\nNova's response:`,
-      });
-
-      await saveMutation.mutateAsync({ role: 'assistant', message: reply });
+      // Use VitaPlate's Nova coach endpoint (Haiku model, context-aware)
+      const chatResult = await base44.entities.CoachMessage.create({ message: trimmed });
+      const reply = chatResult?.message?.message || chatResult?.message || '';
+      if (reply) {
+        await saveMutation.mutateAsync({ role: 'assistant', message: reply });
+      }
     } catch (err) {
       toast.error('Nova had trouble responding. Please try again.');
       console.error(err);
