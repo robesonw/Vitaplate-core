@@ -1,19 +1,72 @@
-import React from 'react';
-import { ComingSoonCard } from './IntegrationCard';
+import React, { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ConnectedIntegrationCard } from './IntegrationCard';
+import { toast } from 'sonner';
+import { supabase } from '@/api/base44Client';
+
+const API      = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const PROVIDER = 'dexcom';
+
+async function api(path, opts = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${session?.access_token}`, 'Content-Type': 'application/json', ...opts.headers },
+  });
+  return res.json();
+}
 
 export default function DexcomCard() {
+  const queryClient = useQueryClient();
+
+  const { data: allStatus } = useQuery({
+    queryKey: ['wearableStatus'],
+    queryFn:  () => api('/api/wearables/status'),
+  });
+
+  const status = allStatus?.[PROVIDER];
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get(PROVIDER) === 'connected') {
+      toast.success('Dexcom connected! Syncing data...');
+      queryClient.invalidateQueries({ queryKey: ['wearableStatus'] });
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get(PROVIDER) === 'error') {
+      toast.error('Dexcom connection failed. Ensure credentials are set in Railway.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  const connectMutation = useMutation({
+    mutationFn: async () => {
+      const data = await api(`/api/wearables/auth-url/${PROVIDER}`);
+      if (data.url) window.location.href = data.url;
+      else throw new Error(data.setup || data.error || 'Dexcom not configured');
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const disconnectMutation = useMutation({
+    mutationFn: () => api(`/api/wearables/disconnect/${PROVIDER}`, { method: 'DELETE' }),
+    onSuccess:  () => {
+      toast.success('Dexcom disconnected');
+      queryClient.invalidateQueries({ queryKey: ['wearableStatus'] });
+    },
+  });
+
   return (
-    <ComingSoonCard
+    <ConnectedIntegrationCard
       logo="📡"
-      name="Dexcom CGM"
-      description="Real-time glucose data directly informs your meal recommendations"
-      benefits={[
-        'See your glucose response to each meal in real time',
-        'Identify which foods spike your blood sugar',
-        'AI adjusts meal plan based on your glucose patterns',
-        'Critical for diabetics — no other app does this',
-      ]}
-      launchDate="Q4 2026 — Priority integration"
+      name="Dexcom"
+      description="Real-time glucose data informs meal recommendations"
+      isConnected={status?.connected}
+      lastSync={status?.lastSync}
+      onConnect={() => connectMutation.mutate()}
+      onDisconnect={() => disconnectMutation.mutate()}
+      isLoading={connectMutation.isPending || disconnectMutation.isPending}
+      connectLabel="Connect Dexcom"
+      connectedBenefits={['See glucose response to each meal in real time', 'AI adjusts plan based on your glucose patterns', 'Critical for diabetics — no other app does this']}
     />
   );
 }

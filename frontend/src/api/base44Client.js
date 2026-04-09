@@ -164,10 +164,25 @@ export const integrations = {
     InvokeLLM:     invokeLLM,
     SendEmail:     async (opts) => { console.log('Email stubbed:', opts?.subject); return { success: true }; },
     UploadFile:    async (opts) => {
-      // File upload via this method not yet configured
-      // Lab PDFs use /api/labs/upload directly
-      console.log('UploadFile stubbed for:', opts?.file?.name);
-      return { file_url: '', success: false, message: 'Please use the dedicated upload in Lab Results' };
+      // Route to the real upload endpoint based on context
+      try {
+        const { supabase: _s } = await import('@/api/base44Client');
+        const { default: sb } = await import('@/api/base44Client');
+        const session = (await sb.supabase?.auth?.getSession())?.data?.session;
+        const token = session?.access_token;
+        if (!opts?.file || !token) return { file_url: '', success: false };
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const formData = new FormData();
+        formData.append('file', opts.file);
+        const res = await fetch(`${apiBase}/api/upload/photo`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
+        });
+        const data = await res.json();
+        return { file_url: data.file_url || '', success: !!data.file_url };
+      } catch (err) {
+        console.error('UploadFile error:', err);
+        return { file_url: '', success: false };
+      }
     },
     GenerateImage: async (opts) => {
       // Image generation not yet configured — return placeholder

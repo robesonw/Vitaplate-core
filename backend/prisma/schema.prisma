@@ -101,6 +101,11 @@ model UserSettings {
   referredBy             String?          @map("referred_by")
   onboardingCompletedAt  DateTime?        @map("onboarding_completed_at")
   onboardingStep         String?          @map("onboarding_step")
+  googleCalendarTokens   String?          @map("google_calendar_tokens") @db.Text
+  fitbitTokens           String?          @map("fitbit_tokens") @db.Text
+  ouraTokens             String?          @map("oura_tokens") @db.Text
+  whoopTokens            String?          @map("whoop_tokens") @db.Text
+  dexcomTokens           String?          @map("dexcom_tokens") @db.Text
 
   user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -195,6 +200,7 @@ model DailyCheckIn {
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, checkInDate])
   @@index([userId])
   @@map("daily_check_ins")
 }

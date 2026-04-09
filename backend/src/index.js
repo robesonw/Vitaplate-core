@@ -15,7 +15,11 @@ import practitionerRouter from './routes/practitioner.js';
 import groceryRouter from './routes/grocery.js';
 import progressRouterFull from './routes/progress.js';
 import corporateRouter from './routes/corporate.js';
+import uploadRouter from './routes/upload.js';
+import calendarRouter from './routes/calendar.js';
+import wearablesRouter from './routes/wearables.js';
 import { ensureStorageBucket } from './services/labUpload.js';
+import { ensureAllBuckets } from './services/storage.js';
 import { startAllJobs } from './jobs/scheduler.js';
 import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
@@ -94,6 +98,9 @@ app.use('/api/practitioner',  practitionerRouter);
 app.use('/api/grocery-lists', groceryRouter);
 app.use('/api/progress',      progressRouterFull);
 app.use('/api/corporate',     corporateRouter);
+app.use('/api/upload',        uploadRouter);
+app.use('/api/calendar',      calendarRouter);
+app.use('/api/wearables',     wearablesRouter);
 
 // ─── 404 + Error handler ──────────────────────────────────────────────────────
 app.use('*', (req, res) => res.status(404).json({ error: `${req.method} ${req.originalUrl} not found` }));
