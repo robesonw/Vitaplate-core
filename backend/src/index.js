@@ -25,7 +25,7 @@ import coachRouter from './routes/coach.js';
 import stripeRouter from './routes/stripe.js';
 import {
   userRouter, notificationRouter,
-  checkInRouter, pantryRouter, alertRouter,
+  checkInRouter, pantryRouter, alertRouter, nutritionLogRouter,
 } from './routes/resources.js';
 
 const app  = express();
@@ -92,6 +92,7 @@ app.use('/api/notifications', notificationRouter);
 app.use('/api/check-ins',     checkInRouter);
 app.use('/api/pantry',        pantryRouter);
 app.use('/api/alerts',        alertRouter);
+app.use('/api/nutrition-logs', nutritionLogRouter);
 app.use('/api/gamification',  gamificationRouter);
 app.use('/api/referral',      referralRouter);
 app.use('/api/practitioner',  practitionerRouter);

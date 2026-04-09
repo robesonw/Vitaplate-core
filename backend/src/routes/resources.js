@@ -297,6 +297,40 @@ pantryRouter.delete('/:id', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ─── Nutrition Logs ────────────────────────────────────────────────────────────
+export const nutritionLogRouter = Router();
+
+nutritionLogRouter.get('/', requireAuth, async (req, res) => {
+  try {
+    const logs = await prisma.nutritionLog.findMany({
+      where: { userId: req.userId },
+      orderBy: { logDate: 'desc' },
+      take: 100,
+    });
+    res.json(logs);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+nutritionLogRouter.post('/', requireAuth, async (req, res) => {
+  try {
+    const log = await prisma.nutritionLog.create({
+      data: { userId: req.userId, logDate: req.body.logDate || new Date().toISOString().split('T')[0], ...req.body },
+    });
+    res.status(201).json(log);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+nutritionLogRouter.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const log = await prisma.nutritionLog.findFirst({ where: { id: req.params.id, userId: req.userId } });
+    if (!log) return res.status(404).json({ error: 'Not found' });
+    await prisma.nutritionLog.delete({ where: { id: log.id } });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
 // ─── Health Alerts ────────────────────────────────────────────────────────────
 export const alertRouter = Router();
 

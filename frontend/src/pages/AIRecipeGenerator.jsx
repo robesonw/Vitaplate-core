@@ -137,7 +137,8 @@ Provide:
     
     setSavingImage(true);
     try {
-      const result = await base44.integrations.Core.GenerateImage({
+      // Use Unsplash for food images
+      const result = { url: `https://source.unsplash.com/600x400/?food,recipe,${encodeURIComponent(recipeName || 'healthy')}`, success: true }; void ({
         prompt: `Professional food photography of ${generatedRecipe.name}, ${form.cuisine} cuisine, appetizing presentation, natural lighting, high quality, restaurant style plating`
       });
       

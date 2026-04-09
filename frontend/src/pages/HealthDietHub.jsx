@@ -575,9 +575,8 @@ Every single meal MUST reflect these adjustments. Prioritize foods that correct 
         try {
           const effectiveCulturalStyle = customCulturalStyle.trim() || (culturalStyle !== 'none' ? culturalStyle : '');
           const culturalContext = effectiveCulturalStyle ? `${effectiveCulturalStyle} style ` : '';
-          const result = await base44.integrations.Core.GenerateImage({
-            prompt: `Professional food photography of ${culturalContext}${mealName}, appetizing presentation, natural lighting, high quality, restaurant style plating`
-          });
+          // Use Unsplash for food images
+          const result = { url: `https://source.unsplash.com/600x400/?food,meal,healthy,${encodeURIComponent(mealName || 'nutrition')}` };
           
           if (result?.url && dayIndex < plan.days.length) {
             updatedDays[dayIndex][mealType].imageUrl = result.url;
@@ -608,10 +607,7 @@ Every single meal MUST reflect these adjustments. Prioritize foods that correct 
     try {
       const effectiveCulturalStyle = customCulturalStyle.trim() || (culturalStyle !== 'none' ? culturalStyle : '');
       const culturalContext = effectiveCulturalStyle ? `${effectiveCulturalStyle} style ` : '';
-      const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Professional food photography of ${culturalContext}${meal.name}, appetizing presentation, natural lighting, high quality, restaurant style plating`
-      });
-      
+      const result = { url: `https://source.unsplash.com/600x400/?food,healthy,meal,nutrition` };
       if (result?.url) {
         const updatedDays = [...generatedPlan.days];
         updatedDays[dayIndex][mealType].imageUrl = result.url;

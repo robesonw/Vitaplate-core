@@ -91,7 +91,7 @@ export const entities = {
   SharedRecipe:            stub('SharedRecipe'),
   SharedProgress:          stub('SharedProgress'),
   FavoriteMeal:            stub('FavoriteMeal'),
-  NutritionLog:            stub('NutritionLog'),
+  NutritionLog:    { list: () => get('/api/nutrition-logs'), filter: () => get('/api/nutrition-logs'), create: d => post('/api/nutrition-logs', d), delete: id => del(`/api/nutrition-logs/${id}`) },
   NutritionGoal:           stub('NutritionGoal'),
   Feedback:                stub('Feedback'),
   ForumPost:               stub('ForumPost'),
