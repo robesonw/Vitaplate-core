@@ -1,4 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import AppleHealthCard from '@/components/integrations/AppleHealthCard';
 import GoogleFitCard from '@/components/integrations/GoogleFitCard';
 import FitbitCard from '@/components/integrations/FitbitCard';
@@ -7,140 +9,117 @@ import OuraRingCard from '@/components/integrations/OuraRingCard';
 import WHOOPCard from '@/components/integrations/WHOOPCard';
 import GoogleCalendarCard from '@/components/integrations/GoogleCalendarCard';
 import DexcomCard from '@/components/integrations/DexcomCard';
+import { PageErrorBoundary } from '@/components/ErrorBoundary';
+import { FlaskConical, Calendar, Activity, Zap } from 'lucide-react';
 
 export default function Integrations() {
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Integrations</h1>
-        <p className="text-slate-600 mt-2">
-          Connect your health devices and apps to sync activity data and personalize your meal plans.
-        </p>
-      </div>
+    <PageErrorBoundary title="Integrations">
+      <div className="space-y-8 max-w-5xl mx-auto">
 
-      {/* Wearable Section */}
-      <div className="space-y-4">
+        {/* Header */}
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">📱 Activity Syncing</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Connect your phone's health platform to automatically sync steps, calories, sleep, and heart rate.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AppleHealthCard />
-          <GoogleFitCard />
-          <FitbitCard />
-          <GarminCard />
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-lg">How Activity Sync Works</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <div>
-            <h4 className="font-semibold text-slate-900 mb-1">🔄 Auto-Adjustment</h4>
-            <p className="text-slate-700">
-              Your daily calorie target automatically adjusts based on your activity level:
-            </p>
-            <ul className="mt-2 ml-4 space-y-1 text-slate-700">
-              <li>• <strong>Sedentary</strong> (&lt;5K steps): No adjustment</li>
-              <li>• <strong>Lightly Active</strong> (5K-7.5K steps): +150 calories</li>
-              <li>• <strong>Active</strong> (7.5K-10K steps): +250 calories</li>
-              <li>• <strong>Very Active</strong> (10K-15K steps): +400 calories</li>
-              <li>• <strong>Extremely Active</strong> (15K+ steps): +600 calories</li>
-            </ul>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-slate-900">Integrations</h1>
+            <Badge className="bg-amber-100 text-amber-700 border border-amber-200">
+              Coming Soon
+            </Badge>
           </div>
-
-          <div>
-            <h4 className="font-semibold text-slate-900 mb-1">📊 Data Used</h4>
-            <p className="text-slate-700">
-              We track and use: steps, calories burned, sleep hours, resting heart rate, and body weight.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-slate-900 mb-1">🔒 Privacy</h4>
-            <p className="text-slate-700">
-              Your health data is encrypted and only used to personalize your nutrition recommendations.
-              You can disconnect at any time.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Calendar Integration */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">📅 Calendar & Scheduling</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Sync your meal plans directly to your calendar.
+          <p className="text-slate-600">
+            Connect your health devices and apps — integrations are in active development.
+            Click "Notify me" on any integration to be first when it launches.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <GoogleCalendarCard />
-        </div>
-      </div>
-
-      {/* Health Monitoring */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">🩺 Health Monitoring</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Monitor blood sugar, biometrics, and other health markers in real time.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DexcomCard />
-        </div>
-      </div>
-
-      {/* Additional Wearables */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">⌚ Premium Wearables</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Advanced biometric tracking from premium devices.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <OuraRingCard />
-          <WHOOPCard />
-        </div>
-      </div>
-
-      {/* Coming Soon */}
-      <Card className="border-dashed border-slate-300">
-        <CardHeader>
-          <CardTitle className="text-lg">Coming Soon 🚀</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-2">⌚ More Wearables</h4>
-              <ul className="space-y-1 text-slate-700">
-                <li>• Apple Watch Health</li>
-                <li>• Withings Health Devices</li>
-                <li>• Polar Sports Watch</li>
-              </ul>
+        {/* What's already working */}
+        <Card className="bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-indigo-600" />
+              What's Already Integrated
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { icon: '🔬', label: 'Lab Results (PDF Upload)', desc: 'Upload any Quest, LabCorp, or standard lab PDF — AI extracts all biomarkers automatically', live: true },
+                { icon: '🧬', label: 'Biomarker Tracking', desc: 'All 30+ markers tracked over time with trend comparison between uploads', live: true },
+                { icon: '💊', label: 'Supplement Recommendations', desc: 'Rules-based recs generated directly from your lab values — no AI cost', live: true },
+                { icon: '📧', label: 'Email Notifications', desc: 'Weekly digest, streak reminders, and health alerts delivered to your inbox', live: true },
+              ].map(({ icon, label, desc, live }) => (
+                <div key={label} className="flex gap-3 p-3 bg-white rounded-lg border border-indigo-100">
+                  <span className="text-2xl">{icon}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-800">{label}</p>
+                      {live && <Badge className="text-xs bg-emerald-100 text-emerald-700">Live ✅</Badge>}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div>
-              <h4 className="font-semibold text-slate-900 mb-2">🏥 Health Data</h4>
-              <ul className="space-y-1 text-slate-700">
-                <li>• Lab results sync</li>
-                <li>• Epic/EHR integration</li>
-              </ul>
-            </div>
+          </CardContent>
+        </Card>
+
+        {/* Priority integration — Dexcom CGM */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-red-500" />
+            <h2 className="text-xl font-semibold text-slate-900">🌟 Priority Integration</h2>
+            <Badge className="bg-red-100 text-red-700 border border-red-200">Most Requested</Badge>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <p className="text-sm text-slate-500">The CGM integration is our #1 priority — no other meal planning app has real-time glucose data.</p>
+          <div className="max-w-sm">
+            <DexcomCard />
+          </div>
+        </div>
+
+        {/* Activity & Wearables */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            <h2 className="text-xl font-semibold text-slate-900">Activity & Wearables</h2>
+          </div>
+          <p className="text-sm text-slate-500">
+            When connected, your activity data automatically adjusts calorie targets and meal plan intensity.
+          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <AppleHealthCard />
+            <GoogleFitCard />
+            <FitbitCard />
+            <GarminCard />
+            <OuraRingCard />
+            <WHOOPCard />
+          </div>
+        </div>
+
+        {/* Calendar */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-blue-500" />
+            <h2 className="text-xl font-semibold text-slate-900">Calendar & Planning</h2>
+          </div>
+          <div className="max-w-sm">
+            <GoogleCalendarCard />
+          </div>
+        </div>
+
+        {/* FHIR / EHR */}
+        <Card className="border-slate-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">🏥 Clinical Integrations (Future)</CardTitle>
+              <Badge variant="outline" className="text-xs">Q4 2026</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-slate-600">
+            <p>Direct EHR (Epic, Cerner) and Apple Health FHIR integrations are planned — these eliminate the PDF upload step entirely by pulling lab results automatically from your medical record.</p>
+            <p className="text-xs text-slate-400 mt-2">These require healthcare-grade API agreements and HIPAA compliance certification — we're working on it.</p>
+          </CardContent>
+        </Card>
+
+      </div>
+    </PageErrorBoundary>
   );
 }
