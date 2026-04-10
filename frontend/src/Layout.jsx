@@ -9,7 +9,7 @@ import {
   Plug, Settings, HelpCircle, Gift, Zap,
   ChevronLeft, ChevronRight, Menu, X,
   Bell, LogOut, Crown, Shield,
-  MessageSquare, FileText, UserCheck,
+  MessageSquare, FileText, UserCheck, Pill,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -36,6 +36,8 @@ const NAV_GROUPS = [
       { name: 'Lab Results',      href: 'LabResults',     icon: FlaskConical, badge: 'Core' },
       { name: 'Health Diet Hub',  href: 'HealthDietHub',  icon: ChefHat, highlight: true },
       { name: 'Nova AI Coach',    href: 'AICoach',        icon: Bot },
+      { name: 'Health Alerts',    href: 'HealthAlerts',   icon: Bell },
+      { name: 'Supplements',      href: 'SupplementRecommendations', icon: Pill },
     ],
   },
   {
@@ -67,8 +69,9 @@ const NAV_GROUPS = [
     items: [
       { name: 'Progress Feed',       href: 'ProgressFeed',      icon: Rss },
       { name: 'Shared Recipes',      href: 'SharedRecipes',     icon: BookOpen },
+      { name: 'Shared Plans',        href: 'SharedMealPlans',   icon: Calendar },
+      { name: 'Forum',               href: 'Forum',             icon: MessageSquare },
       { name: 'Find Practitioner',   href: 'FindPractitioner',  icon: UserCheck },
-      { name: 'Community',           href: 'Community',         icon: Users },
     ],
   },
   {
@@ -76,6 +79,7 @@ const NAV_GROUPS = [
     label: 'Account',
     accent: '#64748b', // slate
     items: [
+      { name: 'My Profile',    href: 'Profile',      icon: User },
       { name: 'Integrations',  href: 'Integrations', icon: Plug },
       { name: 'Refer a Friend', href: 'ReferFriend',  icon: Gift },
       { name: 'Pricing',       href: 'Pricing',      icon: Zap },
