@@ -64,6 +64,13 @@ export async function requireAuth(req, res, next) {
       }));
     }
 
+    // Founder/admin bypass — unlimited credits for configured admin email
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.FOUNDER_EMAIL;
+    if (adminEmail && dbUser.email === adminEmail) {
+      dbUser._isAdmin = true;
+      dbUser._unlimitedCredits = true;
+    }
+
     req.user   = dbUser;
     req.userId = dbUser.id;
     next();

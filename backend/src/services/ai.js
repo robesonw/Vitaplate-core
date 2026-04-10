@@ -58,7 +58,10 @@ export function buildProfileHash(preferences, biomarkers = {}) {
 }
 
 // ─── Credit Management ────────────────────────────────────────────────────────
-export async function checkAndDecrementCredits(userId) {
+export async function checkAndDecrementCredits(userId, isAdmin = false) {
+  // Admin/founder bypass
+  if (isAdmin) return { allowed: true, used: 0, limit: 999, plan: 'admin' };
+
   const settings = await prisma.userSettings.findUnique({ where: { userId } });
   if (!settings) return { allowed: false, reason: 'No settings found' };
 

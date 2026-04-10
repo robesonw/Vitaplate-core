@@ -54,7 +54,7 @@ router.post('/generate', requireAuth, async (req, res) => {
     }
 
     // 3. Check AI credits before generating
-    const creditCheck = await checkAndDecrementCredits(req.userId);
+    const creditCheck = await checkAndDecrementCredits(req.userId, req.user?._unlimitedCredits);
     if (!creditCheck.allowed) {
       // Still try to serve from template even if out of credits
       const template = await getCached(`template:${profileHash}`);

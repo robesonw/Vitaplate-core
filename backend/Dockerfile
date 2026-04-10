@@ -16,14 +16,10 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# ── Development ────────────────────────────────────────────────────────────────
-FROM base AS development
-ENV NODE_ENV=development
-EXPOSE 3001
-CMD ["node", "--watch", "src/index.js"]
-
 # ── Production ─────────────────────────────────────────────────────────────────
 FROM base AS production
 ENV NODE_ENV=production
 EXPOSE 3001
-CMD ["node", "src/index.js"]
+
+# Run prisma db push to sync schema on every deploy, then start server
+CMD sh -c "npx prisma db push --accept-data-loss && node src/index.js"
