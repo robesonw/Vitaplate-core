@@ -76,15 +76,52 @@ userRouter.get('/preferences', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-userRouter.put('/preferences', requireAuth, async (req, res) => {
+
+// Only these fields exist in the UserPreferences schema
+const VALID_PREF_FIELDS = new Set([
+  'age','gender','height','weight','healthGoal','dietaryRestrictions',
+  'foodsLiked','foodsAvoided','allergens','cuisinePreferences',
+  'cookingTime','skillLevel','numPeople','weeklyBudget',
+  'diabetesType','heartCondition','kidneyStage','thyroidCondition',
+]);
+
+function sanitizePrefs(body) {
+  const clean = {};
+  for (const [k, v] of Object.entries(body)) {
+    if (VALID_PREF_FIELDS.has(k)) clean[k] = v;
+  }
+  return clean;
+}
+
+// POST /api/user/preferences — create or upsert
+userRouter.post('/preferences', requireAuth, async (req, res) => {
   try {
+    const data  = sanitizePrefs(req.body);
     const prefs = await prisma.userPreferences.upsert({
       where:  { userId: req.userId },
-      create: { userId: req.userId, ...req.body },
-      update: req.body,
+      create: { userId: req.userId, ...data },
+      update: data,
+    });
+    res.status(201).json(prefs);
+  } catch (err) { 
+    console.error('Preferences POST error:', err.message);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+userRouter.put('/preferences', requireAuth, async (req, res) => {
+  try {
+    const data  = sanitizePrefs(req.body);
+    const prefs = await prisma.userPreferences.upsert({
+      where:  { userId: req.userId },
+      create: { userId: req.userId, ...data },
+      update: data,
     });
     res.json(prefs);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    console.error('Preferences PUT error:', err.message);
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
 userRouter.get('/settings', requireAuth, async (req, res) => {

@@ -73,7 +73,7 @@ export default function Onboarding() {
       setGenerationStep('Saving your health profile...');
       const prefs = {
         healthGoal,
-        dietType,
+        dietaryRestrictions: dietType !== 'custom' ? dietType : '',  // schema field name
         allergens,
         numPeople,
         weeklyBudget,
@@ -102,9 +102,13 @@ export default function Onboarding() {
       });
 
       const plan = await res.json();
-      if (!res.ok) throw new Error(plan.error || 'Plan generation failed');
+      // Don't block onboarding completion if plan generation fails
+      // Users can generate from HealthDietHub
+      if (!res.ok) {
+        console.warn('Plan generation failed (non-fatal):', plan.error);
+      }
 
-      setGenerationStep('Marking setup complete...');
+      setGenerationStep('Finishing setup...');
 
       // 3. Mark onboarding complete
       await fetch(`${API}/api/user/onboarding/complete`, {
