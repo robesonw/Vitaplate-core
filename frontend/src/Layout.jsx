@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import {
   LayoutDashboard, FlaskConical, ChefHat, Bot,
@@ -9,7 +9,7 @@ import {
   Plug, Settings, HelpCircle, Gift, Zap,
   ChevronLeft, ChevronRight, Menu, X,
   Bell, LogOut, Crown, Shield,
-  MessageSquare, FileText, UserCheck, Pill,
+  MessageSquare, FileText, UserCheck, Pill, User,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
