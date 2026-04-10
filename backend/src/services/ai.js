@@ -97,14 +97,18 @@ export async function checkAndDecrementCredits(userId) {
 }
 
 // ─── Meal Plan Generation ─────────────────────────────────────────────────────
-const MEAL_PLAN_SYSTEM = `You are VitaPlate's clinical nutrition AI. Generate personalized 7-day meal plans based on biomarkers and health goals.
+const MEAL_PLAN_SYSTEM = `You are VitaPlate's nutrition AI. Generate a 7-day personalized meal plan.
 
-RULES:
-- Respond ONLY with valid JSON — no prose, no markdown fences
-- Every meal must have: name, calories(string), protein(number,g), carbs(number,g), fat(number,g), nutrients(string), prepTip(string), prepSteps(array), prepTime(string), difficulty(easy|medium|hard), equipment(array), healthBenefit(string)
-- Prioritize foods that directly address the user's abnormal biomarkers
-- Keep meals practical and ingredient-accessible
-- Respect all allergens and dietary restrictions strictly`;
+CRITICAL: Return ONLY raw JSON — no markdown fences, no prose, no explanation.
+
+Each meal object must have exactly these fields:
+{ "name":"","calories":"","protein":0,"carbs":0,"fat":0,"nutrients":"","prepTip":"","prepSteps":["step1","step2"],"prepTime":"","difficulty":"easy","equipment":["pan"],"healthBenefit":"" }
+
+Rules:
+- Be concise in prepTip (1 sentence), nutrients (comma-separated key nutrients), healthBenefit (1 sentence specific to their biomarkers)
+- Keep prepSteps to 3-4 short steps max
+- Prioritize foods that directly improve their abnormal biomarkers
+- Respect all allergens strictly`;
 
 export async function generateMealPlan({ preferences, biomarkers, labSummary }) {
   const profileHash = buildProfileHash(preferences, biomarkers);
@@ -134,13 +138,34 @@ export async function generateMealPlan({ preferences, biomarkers, labSummary }) 
 
   const response = await anthropic.messages.create({
     model:      MODELS.SONNET,
-    max_tokens: 4096,
+    max_tokens: 8192,
     system:     MEAL_PLAN_SYSTEM,
     messages:   [{ role: 'user', content: prompt }],
   });
 
-  const raw  = response.content[0].text;
-  const plan = JSON.parse(raw);
+  const raw  = response.content[0].text.trim();
+
+  // Strip markdown fences if present (```json ... ```)
+  const stripped = raw
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/,       '')
+    .replace(/\s*```$/,       '')
+    .trim();
+
+  // Attempt to extract the outermost JSON object if there's surrounding text
+  const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error('No JSON object found in AI response. Raw length:', raw.length);
+    throw new SyntaxError('AI response contained no valid JSON object');
+  }
+
+  const plan = JSON.parse(jsonMatch[0]);
+
+  // Validate the plan has the expected structure
+  if (!plan.days || !Array.isArray(plan.days) || plan.days.length === 0) {
+    console.error('AI returned JSON but missing days array. Keys:', Object.keys(plan));
+    throw new SyntaxError('AI response missing days array — plan structure invalid');
+  }
 
   // 4. Store as template for future users with same profile
   await prisma.mealPlanTemplate.upsert({

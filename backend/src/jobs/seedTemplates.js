@@ -123,12 +123,17 @@ async function seedTemplates() {
       console.log(`🤖 Generating: "${profile.label}"...`);
       const response = await anthropic.messages.create({
         model:      'claude-sonnet-4-5',
-        max_tokens: 4096,
+        max_tokens: 8192,
         system:     SYSTEM_PROMPT,
         messages:   [{ role: 'user', content: buildPrompt(profile) }],
       });
 
-      const plan = JSON.parse(response.content[0].text);
+      const rawText = response.content[0].text.trim()
+        .replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object in response');
+      const plan = JSON.parse(jsonMatch[0]);
+      if (!plan.days?.length) throw new Error('Missing days array in plan');
 
       await prisma.mealPlanTemplate.create({
         data: {
