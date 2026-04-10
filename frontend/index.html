@@ -2,17 +2,77 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="VitaPlate" />
-    <meta name="theme-color" content="#6366f1" />
-    <meta name="description" content="Smart Nutrition & Meal Planning Platform" />
-    <link rel="apple-touch-icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png" />
+
+    <!-- Primary SEO -->
+    <title>VitaPlate — Meal Plans Built From Your Blood Work</title>
+    <meta name="description" content="Upload your lab results. AI extracts your biomarkers and builds a 7-day personalized meal plan to fix what's off. The only nutrition platform driven by your actual blood work." />
+    <meta name="keywords" content="biomarker meal plan, lab results nutrition, blood work diet, personalized meal planning, LDL cholesterol diet, HbA1c meal plan, vitamin D foods, AI nutrition" />
+    <link rel="canonical" href="https://www.vitaplate.ai/" />
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content="https://www.vitaplate.ai/" />
+    <meta property="og:title"       content="VitaPlate — Your Blood Work Becomes Your Meal Plan" />
+    <meta property="og:description" content="Upload any lab report. AI reads your biomarkers — LDL, glucose, Vitamin D, CRP — and builds a 7-day meal plan specifically designed to fix what's off." />
+    <meta property="og:image"       content="https://www.vitaplate.ai/og-image.svg" />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name"   content="VitaPlate" />
+    <meta property="og:locale"      content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@VitaPlateAI" />
+    <meta name="twitter:title"       content="VitaPlate — Your Blood Work Becomes Your Meal Plan" />
+    <meta name="twitter:description" content="Upload any lab report. AI extracts your biomarkers and builds a personalized meal plan to fix what's off. Free to start." />
+    <meta name="twitter:image"       content="https://www.vitaplate.ai/og-image.svg" />
+
+    <!-- PWA / Mobile -->
+    <meta name="mobile-web-app-capable"         content="yes" />
+    <meta name="apple-mobile-web-app-capable"   content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title"     content="VitaPlate" />
+    <meta name="theme-color"                    content="#6366f1" />
+    <meta name="application-name"              content="VitaPlate" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png" />
+    <link rel="apple-touch-icon"     href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png" />
     <link rel="manifest" href="/manifest.json" />
-    <title>VitaPlate — Smart Nutrition Platform</title>
+
+    <!-- Structured data (Google rich results) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "VitaPlate",
+      "url": "https://www.vitaplate.ai",
+      "description": "AI-powered nutrition platform that builds personalized meal plans from your lab results and biomarkers.",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free plan available"
+      },
+      "featureList": [
+        "Lab result PDF upload and biomarker extraction",
+        "AI-generated personalized meal plans",
+        "Lab trend tracking and comparison",
+        "Supplement recommendations from biomarkers",
+        "Nova AI nutrition coach"
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts — DM Sans for the hero headline -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,700;0,9..40,900&display=swap" rel="stylesheet" />
+
+    <!-- Service Worker -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

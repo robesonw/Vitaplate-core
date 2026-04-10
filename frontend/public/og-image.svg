@@ -1,0 +1,73 @@
+<!-- VitaPlate OG Image 1200x630 -->
+<!-- Place this at /public/og-image.svg (or generate PNG from it) -->
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0f1117"/>
+      <stop offset="50%"  stop-color="#0d1331"/>
+      <stop offset="100%" stop-color="#0f1117"/>
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#818cf8"/>
+      <stop offset="50%"  stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Dot grid -->
+  <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="rgba(99,102,241,0.06)"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Glow effects -->
+  <ellipse cx="300" cy="200" rx="300" ry="250" fill="rgba(99,102,241,0.07)"/>
+  <ellipse cx="950" cy="430" rx="250" ry="200" fill="rgba(16,185,129,0.06)"/>
+
+  <!-- Badge -->
+  <rect x="80" y="70" width="300" height="38" rx="19" fill="rgba(99,102,241,0.12)" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+  <text x="230" y="94" font-family="-apple-system, system-ui, sans-serif" font-size="14" font-weight="500" fill="#818cf8" text-anchor="middle">🔬 Biomarker-Driven Nutrition</text>
+
+  <!-- Main headline -->
+  <text x="80" y="200" font-family="-apple-system, system-ui, sans-serif" font-size="72" font-weight="900" fill="#ffffff" letter-spacing="-2">Your blood work</text>
+  <text x="80" y="285" font-family="-apple-system, system-ui, sans-serif" font-size="72" font-weight="900" fill="url(#textGrad)" letter-spacing="-2">becomes your meal plan.</text>
+
+  <!-- Subtext -->
+  <text x="80" y="340" font-family="-apple-system, system-ui, sans-serif" font-size="24" font-weight="400" fill="#94a3b8">Upload any lab PDF. AI extracts your biomarkers. Get a personalized 7-day plan.</text>
+
+  <!-- Feature pills -->
+  <rect x="80"  y="385" width="190" height="36" rx="18" fill="rgba(99,102,241,0.1)"  stroke="rgba(99,102,241,0.25)"  stroke-width="1"/>
+  <text x="175" y="408" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#818cf8" text-anchor="middle">🔬 Lab Analysis</text>
+
+  <rect x="285" y="385" width="200" height="36" rx="18" fill="rgba(16,185,129,0.1)"  stroke="rgba(16,185,129,0.25)"  stroke-width="1"/>
+  <text x="385" y="408" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#34d399" text-anchor="middle">🥗 Meal Planning</text>
+
+  <rect x="500" y="385" width="230" height="36" rx="18" fill="rgba(245,158,11,0.1)"  stroke="rgba(245,158,11,0.25)"  stroke-width="1"/>
+  <text x="615" y="408" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#fbbf24" text-anchor="middle">⭐ Trend Tracking</text>
+
+  <rect x="745" y="385" width="210" height="36" rx="18" fill="rgba(139,92,246,0.1)"  stroke="rgba(139,92,246,0.25)"  stroke-width="1"/>
+  <text x="850" y="408" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#a78bfa" text-anchor="middle">💊 Supplements</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="460" x2="1120" y2="460" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+  <!-- Bottom row -->
+  <text x="80" y="510" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="400" fill="#475569">Free to start · No credit card required</text>
+
+  <!-- CTA box -->
+  <rect x="850" y="480" width="270" height="52" rx="12" fill="url(#logoGrad)"/>
+  <text x="985" y="512" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">Get My Plan Free →</text>
+
+  <!-- Logo + domain — bottom right -->
+  <rect x="80" y="565" width="32" height="32" rx="8" fill="url(#logoGrad)"/>
+  <text x="96" y="586" font-family="-apple-system, system-ui, sans-serif" font-size="15" font-weight="900" fill="#ffffff" text-anchor="middle">V</text>
+  <text x="125" y="586" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="700" fill="#ffffff">VitaPlate</text>
+  <text x="210" y="586" font-family="-apple-system, system-ui, sans-serif" font-size="15" font-weight="400" fill="#475569">vitaplate.ai</text>
+</svg>

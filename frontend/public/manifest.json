@@ -1,12 +1,13 @@
 {
-  "name": "VitaPlate",
+  "name": "VitaPlate — Biomarker Nutrition",
   "short_name": "VitaPlate",
-  "description": "Smart Nutrition & Meal Planning Platform",
+  "description": "Meal plans built from your blood work. Upload lab results, get a 7-day personalized plan.",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#f8fafc",
+  "background_color": "#0f1117",
   "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["health", "fitness", "food"],
   "icons": [
     {
       "src": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695042d8937b0c0cf7f7afd6/1812bfbf0_image.png",
@@ -21,23 +22,25 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "food", "lifestyle"],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/og-image.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "VitaPlate — Lab results become meal plans"
+    }
+  ],
   "shortcuts": [
     {
-      "name": "Log Meal",
-      "url": "/NutritionTracking",
-      "description": "Quickly log a meal"
+      "name": "Upload Lab Results",
+      "url": "/LabResults",
+      "description": "Upload your blood work PDF"
     },
     {
-      "name": "Meal Plans",
+      "name": "My Meal Plan",
       "url": "/MealPlans",
-      "description": "View your meal plans"
-    },
-    {
-      "name": "Grocery List",
-      "url": "/GroceryLists",
-      "description": "View grocery list"
+      "description": "View your personalized meal plan"
     }
   ]
 }

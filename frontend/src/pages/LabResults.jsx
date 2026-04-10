@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import LabUploader from '../components/labs/LabUploader';
+import ShareLabResults from '../components/labs/ShareLabResults';
 import { PageErrorBoundary, ComponentErrorBoundary } from '../components/ErrorBoundary';
 
 const STATUS_COLORS = {
@@ -244,6 +245,19 @@ export default function LabResults() {
                         <p className="text-sm text-slate-600">Tracked markers</p>
                       </CardContent>
                     </Card>
+                  </div>
+
+                  {/* Share button */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-slate-500">
+                      {trends.improved} of {trends.totalMarkers} markers improved since your last labs
+                    </p>
+                    <ShareLabResults
+                      trends={trends.trends}
+                      labDates={{ latestDate: trends.latestDate, previousDate: trends.previousDate }}
+                      improved={trends.improved}
+                      total={trends.totalMarkers}
+                    />
                   </div>
 
                   {/* Trend rows */}
