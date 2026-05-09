@@ -78,6 +78,26 @@ app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders
 app.use('/api/meal-plans/generate', rateLimit({ windowMs: 60 * 60 * 1000, max: 10 }));
 app.use('/api/coach/chat', rateLimit({ windowMs: 60 * 60 * 1000, max: 10 }));
 
+
+// ── ONE-TIME SEED ENDPOINT — remove after running ────────────────────────────
+app.post('/admin/seed-templates', async (req, res) => {
+  const secret = req.headers['x-seed-secret'];
+  if (secret !== process.env.SEED_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({ message: 'Seeder started — check Railway deploy logs for progress' });
+  
+  // Run seeder async (non-blocking so response returns immediately)
+  import('./jobs/seedTemplates.js').then(m => {
+    if (m.runSeeder) {
+      m.runSeeder().then(() => console.log('✅ Seed complete'))
+               .catch(e => console.error('❌ Seed failed:', e.message));
+    } else {
+      console.log('⚠️  runSeeder() not exported — check seedTemplates.js');
+    }
+  }).catch(e => console.error('❌ Import failed:', e.message));
+});
+
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 

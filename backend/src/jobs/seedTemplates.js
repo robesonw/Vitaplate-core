@@ -167,4 +167,10 @@ async function seedTemplates() {
   await prisma.$disconnect();
 }
 
-seedTemplates().catch(console.error);
+// Export for API trigger
+export const runSeeder = seedTemplates;
+
+// Direct execution when run as script
+if (process.argv[1]?.includes('seedTemplates')) {
+  seedTemplates().catch(console.error);
+}
