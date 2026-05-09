@@ -8,7 +8,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 // POST /api/ai/invoke — generic LLM call (replaces base44.integrations.Core.InvokeLLM)
 router.post('/invoke', requireAuth, async (req, res) => {
   try {
-    const { prompt, response_json_schema, max_tokens = 1024 } = req.body;
+    const { prompt, response_json_schema, max_tokens = 2048 } = req.body;
     if (!prompt) return res.status(400).json({ error: 'prompt required' });
 
     const systemPrompt = response_json_schema
@@ -27,10 +27,13 @@ router.post('/invoke', requireAuth, async (req, res) => {
     // Try to parse JSON if schema was requested
     if (response_json_schema) {
       try {
-        const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+        const cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
         return res.json(parsed);
-      } catch {
-        return res.json({ text });
+      } catch (parseErr) {
+        console.error('JSON parse failed, returning raw text:', parseErr.message);
+        return res.json({ text, _parseError: true });
       }
     }
 

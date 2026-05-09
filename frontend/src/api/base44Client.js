@@ -150,12 +150,18 @@ export default base44;
 // ─── Missing Base44 namespaces — prevents crashes on any page ────────────────
 
 // Wires InvokeLLM to our backend AI endpoint
-async function invokeLLM({ prompt, response_json_schema, max_tokens }) {
+async function invokeLLM({ prompt, response_json_schema, max_tokens = 2048 }) {
   try {
     const result = await post('/api/ai/invoke', { prompt, response_json_schema, max_tokens });
+    // When JSON schema is requested, backend returns the parsed object directly
+    // When no schema, backend returns { text: '...' }
+    if (response_json_schema) {
+      return result; // parsed JSON object
+    }
     return result?.text || result?.content || '';
-  } catch {
-    return '';
+  } catch (err) {
+    console.error('InvokeLLM error:', err);
+    return response_json_schema ? null : '';
   }
 }
 
