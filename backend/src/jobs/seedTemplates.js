@@ -53,9 +53,10 @@ const SEED_PROFILES = [
   { label: 'Heart + Inflammation',             conditions: { heartCondition: 'high_cholesterol' }, biomarkers: { 'LDL Cholesterol': { value: 150, status: 'high' }, CRP: { value: 3.0, status: 'high' } }, dietType: 'liver-centric', goal: 'heart_health' },
 ];
 
-const SYSTEM_PROMPT = `You are VitaPlate's clinical nutrition AI. Generate personalized 7-day meal plans.
-Respond ONLY with valid JSON — no prose, no markdown, no explanation.
-Every meal must include: name, calories(string), protein(number,g), carbs(number,g), fat(number,g), nutrients(string), prepTip(string), prepSteps(array of strings), prepTime(string), difficulty(easy|medium|hard), equipment(array), healthBenefit(string)`;
+const SYSTEM_PROMPT = `You are VitaPlate's nutrition AI. Generate a 7-day meal plan.
+Return ONLY raw JSON — no markdown, no prose, no backticks.
+Keep each meal concise: name, calories, protein(g), carbs(g), fat(g), healthBenefit(one sentence), prepTime.
+Do not include prepSteps, equipment, or nutrients in templates — these are added later.`;
 
 function buildHash(profile) {
   const key = JSON.stringify({
@@ -90,13 +91,15 @@ function buildPrompt(profile) {
 - Abnormal biomarkers to address: ${abnormal || 'none (general wellness)'}
 - Budget: $100/week, skill: intermediate, 1 person
 
-Return JSON:
+Return ONLY this JSON structure (no extra text):
 {
-  "name": "...",
-  "days": [{ "day": "Monday", "breakfast": {meal object}, "lunch": {meal object}, "dinner": {meal object}, "snacks": {meal object} }, ...7 days],
-  "macros": { "protein": 0, "carbs": 0, "fat": 0 },
-  "estimated_cost": 0,
-  "grocery_list": {}
+  "name": "plan name",
+  "days": [
+    { "day": "Monday", "breakfast": {"name":"","calories":"","protein":0,"carbs":0,"fat":0,"healthBenefit":"","prepTime":"15 min"}, "lunch": {same}, "dinner": {same}, "snacks": {same} },
+    ...repeat for all 7 days (Monday through Sunday)
+  ],
+  "macros": {"protein": 0, "carbs": 0, "fat": 0},
+  "estimated_cost": 0
 }`;
 }
 
@@ -123,7 +126,7 @@ async function seedTemplates() {
       console.log(`🤖 Generating: "${profile.label}"...`);
       const response = await anthropic.messages.create({
         model:      'claude-sonnet-4-5',
-        max_tokens: 8192,
+        max_tokens: 12000,
         system:     SYSTEM_PROMPT,
         messages:   [{ role: 'user', content: buildPrompt(profile) }],
       });
