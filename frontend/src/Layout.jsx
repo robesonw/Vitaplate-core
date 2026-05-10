@@ -268,7 +268,9 @@ export default function Layout({ children, currentPageName }) {
         )}
 
         <button
+          type="button"
           onClick={toggleCollapsed}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={`hidden lg:flex items-center justify-center w-6 h-6 rounded-md text-slate-500 hover:text-white hover:bg-white/10 transition-all ${collapsed ? 'mt-3' : ''}`}
         >
           {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}

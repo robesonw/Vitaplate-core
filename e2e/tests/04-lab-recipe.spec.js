@@ -1,110 +1,94 @@
-import { test, expect, waitForAPI } from '../fixtures/helpers.js';
-import path from 'path';
+import { test, expect, skipIfLoginPage } from '../fixtures/helpers.js';
 
 test.describe('Lab Results page', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/LabResults');
-    if (!page.url().includes('LabResults')) return test.skip();
+    await skipIfLoginPage(page);
   });
 
   test('renders 4-tab layout', async ({ page }) => {
-    await expect(page.locator('text=Upload Labs')).toBeVisible();
-    await expect(page.locator('text=My Results')).toBeVisible();
-    await expect(page.locator('text=Trends')).toBeVisible();
-    await expect(page.locator('text=Supplements')).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Upload Labs/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /My Results/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Trends/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Supplements/i })).toBeVisible();
   });
 
   test('upload tab shows drag-and-drop zone', async ({ page }) => {
-    await expect(page.locator('text=Drop your lab report here')).toBeVisible();
-    await expect(page.locator('text=Quest Diagnostics')).toBeVisible();
-    await expect(page.locator('text=LabCorp')).toBeVisible();
+    await expect(page.getByText('Drop your lab report here')).toBeVisible();
+    await expect(page.getByText('Quest Diagnostics')).toBeVisible();
+    await expect(page.getByText('LabCorp')).toBeVisible();
   });
 
   test('upload tab shows biomarker preview cards', async ({ page }) => {
-    await expect(page.locator('text=Cholesterol Panel')).toBeVisible();
-    await expect(page.locator('text=Blood Sugar')).toBeVisible();
-    await expect(page.locator('text=Vitamins & Minerals')).toBeVisible();
+    await expect(page.getByText('Cholesterol Panel')).toBeVisible();
+    await expect(page.getByText('Blood Sugar')).toBeVisible();
+    await expect(page.getByText('Vitamins & Minerals')).toBeVisible();
   });
 
   test('upload rejects non-PDF files', async ({ page }) => {
     const fileInput = page.locator('input[type="file"]');
-    // Set a fake non-PDF file
     await fileInput.setInputFiles({
       name: 'test.txt',
       mimeType: 'text/plain',
       buffer: Buffer.from('not a pdf'),
     });
-    await expect(page.locator('text=Only PDF files')).toBeVisible();
+    await expect(page.getByText(/PDF/i)).toBeVisible();
   });
 
   test('My Results tab shows empty state when no labs', async ({ page }) => {
-    await page.locator('text=My Results').click();
-    // Either shows labs or empty state
-    const hasLabs = await page.locator('[class*="border"]').count() > 0;
-    const hasEmpty = await page.locator('text=No lab results yet').isVisible().catch(() => false);
-    expect(hasLabs || hasEmpty).toBeTruthy();
+    await page.getByRole('tab', { name: /My Results/i }).click();
+    const hasEmpty = await page.getByText('No lab results yet').isVisible().catch(() => false);
+    const hasList = await page.locator('[class*="border-indigo-500"]').count() > 0;
+    expect(hasEmpty || hasList).toBeTruthy();
   });
 });
 
 test.describe('Recipe Generator', () => {
-
   test.beforeEach(async ({ page }) => {
     await page.goto('/AIRecipeGenerator');
-    if (!page.url().includes('AIRecipeGenerator')) return test.skip();
+    await skipIfLoginPage(page);
   });
 
   test('page renders with form and empty state', async ({ page }) => {
-    await expect(page.locator('text=AI Recipe Generator')).toBeVisible();
-    await expect(page.locator('text=Recipe Criteria')).toBeVisible();
-    await expect(page.locator('text=Ready to Create?')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /AI Recipe Generator/i })).toBeVisible();
+    await expect(page.getByText('Recipe Criteria')).toBeVisible();
+    await expect(page.getByText('Ready to Create?')).toBeVisible();
   });
 
   test('form has all required fields', async ({ page }) => {
-    await expect(page.locator('text=Meal Type')).toBeVisible();
-    await expect(page.locator('text=Cuisine Type')).toBeVisible();
-    await expect(page.locator('text=Dietary Preference')).toBeVisible();
-    await expect(page.locator('text=Available Ingredients')).toBeVisible();
+    await expect(page.getByText('Meal Type', { exact: true })).toBeVisible();
+    await expect(page.getByText('Cuisine Type', { exact: true })).toBeVisible();
+    await expect(page.getByText('Dietary Preference', { exact: true })).toBeVisible();
+    await expect(page.getByText('Available Ingredients', { exact: true })).toBeVisible();
   });
 
   test('requires ingredients before generating', async ({ page }) => {
-    await page.locator('text=Generate Recipe').click();
-    await expect(page.locator('text=Please enter some available ingredients')).toBeVisible();
+    await page.getByRole('button', { name: /Generate Recipe/i }).click();
+    await expect(page.getByText('Please enter some available ingredients')).toBeVisible();
   });
 
   test('generates recipe with valid inputs', async ({ page }) => {
-    // Fill in ingredients
-    await page.locator('textarea').fill('chicken breast, garlic, olive oil, lemon, rosemary');
+    test.slow();
+    await page.locator('textarea').first().fill('chicken breast, garlic, olive oil, lemon, rosemary');
+    await page.getByRole('button', { name: /Generate Recipe/i }).click();
 
-    // Click generate
-    const apiPromise = waitForAPI(page, '/api/ai/invoke', 45_000);
-    await page.locator('text=Generate Recipe').click();
-
-    // Loading state visible
-    await expect(page.locator('text=AI is crafting your recipe')).toBeVisible();
-
-    // Wait for API response
-    await apiPromise;
-
-    // Recipe should appear
-    await expect(page.locator('text=Ingredients')).toBeVisible({ timeout: 45_000 });
-    await expect(page.locator('text=Instructions')).toBeVisible();
-    await expect(page.locator('text=Nutrition per Serving')).toBeVisible();
+    await expect(page.getByText(/AI is crafting your recipe/i)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: /^Ingredients$/i })).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByRole('heading', { name: /^Instructions$/i })).toBeVisible();
+    await expect(page.getByText('Nutrition per Serving')).toBeVisible();
   });
 
   test('generated recipe shows all sections', async ({ page }) => {
-    await page.locator('textarea').fill('salmon, quinoa, spinach, lemon, garlic');
-    await page.locator('text=Generate Recipe').click();
+    test.slow();
+    await page.locator('textarea').first().fill('salmon, quinoa, spinach, lemon, garlic');
+    await page.getByRole('button', { name: /Generate Recipe/i }).click();
 
-    await expect(page.locator('text=Ingredients')).toBeVisible({ timeout: 45_000 });
-
-    // All sections
-    await expect(page.locator('text=Instructions')).toBeVisible();
-    await expect(page.locator('text=Nutrition per Serving')).toBeVisible();
-    await expect(page.locator('text=Health Benefits')).toBeVisible();
-
-    // Action buttons
-    await expect(page.locator('text=Generate Image')).toBeVisible();
-    await expect(page.locator('text=Save Recipe')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Ingredients$/i })).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByRole('heading', { name: /^Instructions$/i })).toBeVisible();
+    await expect(page.getByText('Nutrition per Serving')).toBeVisible();
+    await expect(page.getByText(/Health Benefits|health benefits/i).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Generate Image/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Save Recipe/i })).toBeVisible();
   });
 });

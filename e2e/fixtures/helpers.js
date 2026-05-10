@@ -35,6 +35,13 @@ export const test = base.extend({
 
 export { expect };
 
+// ─── Skip when SPA shows login (protected routes without session) ───────────
+export async function skipIfLoginPage(page) {
+  await page.waitForLoadState('domcontentloaded');
+  const wall = await page.getByRole('heading', { name: /^welcome back$/i }).isVisible().catch(() => false);
+  if (wall) test.skip(true, 'Requires auth — set TEST_EMAIL/TEST_PASSWORD or storage state for full app e2e');
+}
+
 // ─── Helper: wait for API response ───────────────────────────────────────────
 export async function waitForAPI(page, urlPattern, timeout = 30_000) {
   return page.waitForResponse(

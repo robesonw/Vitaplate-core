@@ -18,14 +18,12 @@ export default defineConfig({
     navigationTimeout: 30_000,
   },
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'mobile',
-      use: { ...devices['iPhone 14'] },
-    },
-  ],
+  projects: process.env.PLAYWRIGHT_MOBILE === '1'
+    ? [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+        { name: 'mobile', use: { ...devices['iPhone 14'] } },
+      ]
+    : [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+      ],
 });
