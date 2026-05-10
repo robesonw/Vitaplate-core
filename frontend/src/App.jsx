@@ -6,6 +6,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import Index from './pages/Index';
+import Quiz from './pages/Quiz';
 import Pricing from './pages/Pricing';
 import Onboarding from './pages/Onboarding';
 import Pantry from './pages/Pantry';
@@ -35,7 +36,7 @@ import { usePageTitle } from '@/lib/usePageTitle';
 
 // ─── Public routes — no auth required ────────────────────────────────────────
 // These render before any auth check so unauthenticated users can see them
-const PUBLIC_PATHS = ['/', '/Pricing', '/Onboarding'];
+const PUBLIC_PATHS = ['/', '/Pricing', '/Onboarding', '/Quiz'];
 const PUBLIC_PREFIXES = ['/refer/', '/scorecard/', '/practitioners', '/corporate'];
 
 function isPublicPath(pathname) {
@@ -50,6 +51,7 @@ function PublicRoutes() {
       <Route path="/"                  element={<Index />} />
       <Route path="/Pricing"           element={<Pricing />} />
       <Route path="/Onboarding"        element={<Onboarding />} />
+      <Route path="/Quiz"              element={<Quiz />} />
       <Route path="/refer/:code"       element={<ReferralLanding />} />
       <Route path="/scorecard/:userId" element={<ScorecardView />} />
       <Route path="/practitioners"     element={<PractitionerSignup />} />

@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useInView, useAnimation } from 'framer-motion';
-import { ArrowRight, FlaskConical, ChefHat, TrendingDown, Sparkles, CheckCircle, Star, ChevronDown } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { ArrowRight, FlaskConical, CheckCircle, ChevronDown, Sparkles, TrendingDown, Star } from 'lucide-react';
 
-// ─── Animated counter ─────────────────────────────────────────────────────────
+// ─── Animated number counter ──────────────────────────────────────────────────
 function Counter({ to, suffix = '', duration = 2 }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = React.useState(0);
   const ref = useRef();
   const inView = useInView(ref, { once: true });
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (!inView) return;
     let start = 0;
     const step = to / (duration * 60);
@@ -20,301 +19,228 @@ function Counter({ to, suffix = '', duration = 2 }) {
     }, 1000 / 60);
     return () => clearInterval(timer);
   }, [inView, to, duration]);
-
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
-// ─── Animated biomarker → meal visual ─────────────────────────────────────────
-function HeroVisual() {
-  const markers = [
-    { name: 'LDL Cholesterol', value: 145, unit: 'mg/dL', status: 'high',   color: '#ef4444' },
-    { name: 'Vitamin D',       value: 18,  unit: 'ng/mL', status: 'low',    color: '#3b82f6' },
-    { name: 'HbA1c',           value: 6.1, unit: '%',     status: 'border', color: '#f59e0b' },
-    { name: 'CRP',             value: 3.2, unit: 'mg/L',  status: 'high',   color: '#ef4444' },
-    { name: 'HDL',             value: 62,  unit: 'mg/dL', status: 'normal', color: '#10b981' },
-  ];
-
-  const meals = [
-    { name: 'Salmon & Quinoa Bowl',    why: 'Lowers LDL via Omega-3',      emoji: '🐟', color: '#4f46e5' },
-    { name: 'Mushroom Omelette',       why: 'Boosts Vitamin D',             emoji: '🍳', color: '#059669' },
-    { name: 'Lentil & Veggie Stew',    why: 'Stabilizes blood sugar',       emoji: '🥘', color: '#d97706' },
-    { name: 'Turmeric Cauliflower',    why: 'Anti-inflammatory for CRP',    emoji: '🥦', color: '#7c3aed' },
-  ];
-
+// ─── Floating biomarker card ───────────────────────────────────────────────────
+function BiomarkerCard({ name, value, unit, status, color, delay }) {
   return (
-    <div className="relative w-full max-w-4xl mx-auto h-[480px] select-none">
-      {/* Glow effects */}
-      <div className="absolute inset-0 overflow-hidden rounded-3xl">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
-      </div>
-
-      {/* Lab panel — left */}
-      <motion.div
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3, duration: 0.7 }}
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-64 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-7 h-7 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-            <FlaskConical className="w-4 h-4 text-indigo-400" />
-          </div>
-          <div>
-            <p className="text-white text-xs font-semibold">Your Lab Results</p>
-            <p className="text-slate-500 text-xs">Quest Diagnostics · Jan 2026</p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          {markers.map((m, i) => (
-            <motion.div key={m.name}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + i * 0.1 }}
-              className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-white/5"
-            >
-              <div>
-                <p className="text-xs text-slate-300 font-medium leading-tight">{m.name}</p>
-                <p className="text-xs text-slate-500">{m.value} {m.unit}</p>
-              </div>
-              <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold"
-                style={{ backgroundColor: m.color + '20', color: m.color }}>
-                {m.status === 'border' ? 'borderline' : m.status}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Arrow + AI label — center */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ repeat: Infinity, duration: 3 }}
-          className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/40"
-        >
-          <Sparkles className="w-7 h-7 text-white" />
-        </motion.div>
-        <motion.div
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="text-xs text-indigo-400 font-semibold tracking-widest uppercase"
-        >
-          AI Analysis
-        </motion.div>
-        {/* Animated flow lines */}
-        <svg className="absolute -z-10" width="200" height="4" viewBox="0 0 200 4">
-          <motion.line x1="0" y1="2" x2="200" y2="2" stroke="url(#flowGrad)"
-            strokeWidth="2" strokeDasharray="8 4"
-            animate={{ strokeDashoffset: [0, -24] }}
-            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} />
-          <defs>
-            <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
-              <stop offset="50%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-      {/* Meal plan — right */}
-      <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.6, duration: 0.7 }}
-        className="absolute right-0 top-1/2 -translate-y-1/2 w-64 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-7 h-7 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-            <ChefHat className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-white text-xs font-semibold">Your Meal Plan</p>
-            <p className="text-slate-500 text-xs">Optimized for your biomarkers</p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          {meals.map((m, i) => (
-            <motion.div key={m.name}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 + i * 0.1 }}
-              className="flex items-start gap-2 py-1.5 px-2 rounded-lg bg-white/5"
-            >
-              <span className="text-lg flex-shrink-0">{m.emoji}</span>
-              <div>
-                <p className="text-xs text-slate-200 font-medium leading-tight">{m.name}</p>
-                <p className="text-xs leading-tight" style={{ color: m.color }}>{m.why}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4 }}
-          className="mt-3 flex items-center gap-1.5 px-2 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg"
-        >
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-          <p className="text-xs text-emerald-400 font-medium">Addresses 4 of your abnormal markers</p>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── Feature card ─────────────────────────────────────────────────────────────
-function FeatureCard({ icon: Icon, title, description, accent, delay }) {
-  const ref = useRef();
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  return (
-    <motion.div ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay, duration: 0.5 }}
-      className="group relative p-6 rounded-2xl bg-slate-900/50 border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+      className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-xl"
     >
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-        style={{ backgroundColor: accent + '20' }}>
-        <Icon className="w-5 h-5" style={{ color: accent }} />
+      <div className="flex items-center justify-between gap-6">
+        <div>
+          <p className="text-xs text-slate-400">{name}</p>
+          <p className="text-lg font-bold text-white">{value} <span className="text-xs font-normal text-slate-500">{unit}</span></p>
+        </div>
+        <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ background: `${color}20`, color }}>
+          {status}
+        </span>
       </div>
-      <h3 className="font-bold text-white mb-2">{title}</h3>
-      <p className="text-slate-400 text-sm leading-relaxed">{description}</p>
     </motion.div>
   );
 }
 
-// ─── Main Landing Page ────────────────────────────────────────────────────────
+// ─── Testimonial card ──────────────────────────────────────────────────────────
+function TestimonialCard({ quote, result, name, condition, delay }) {
+  const ref = useRef();
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  return (
+    <motion.div ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay, duration: 0.5 }}
+      className="p-6 rounded-2xl border border-white/8 bg-white/3 space-y-4"
+    >
+      <div className="flex gap-0.5">
+        {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />)}
+      </div>
+      <p className="text-slate-300 text-sm leading-relaxed">"{quote}"</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-white font-semibold text-sm">{name}</p>
+          <p className="text-slate-500 text-xs">{condition}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-emerald-400 font-bold text-sm">{result}</p>
+          <p className="text-slate-600 text-xs">in 8 weeks</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Index() {
   return (
-    <div className="min-h-screen bg-[#080b14] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#070a12] text-white overflow-x-hidden">
 
-      {/* Nav bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#080b14]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+      {/* ── Navbar ────────────────────────────────────────────────────────────── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
+        style={{ background: 'rgba(7,10,18,0.85)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <span className="text-white font-black text-sm">V</span>
             </div>
-            <span className="font-bold text-white text-lg">VitaPlate</span>
-          </div>
+            <span className="font-black text-white text-lg tracking-tight">VitaPlate</span>
+          </Link>
           <div className="flex items-center gap-3">
             <Link to="/Pricing" className="text-slate-400 hover:text-white text-sm transition-colors hidden sm:block">Pricing</Link>
-            <Link to="/Onboarding"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-500/20">
-              Get Started Free
+            <Link to="/Dashboard" className="text-slate-400 hover:text-white text-sm transition-colors hidden sm:block">Sign In</Link>
+            <Link to="/Quiz"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-500/25">
+              Take the Quiz
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 px-4">
-        {/* Background mesh */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
+      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 px-4">
+        {/* Ambient background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full opacity-20"
+            style={{ background: 'radial-gradient(ellipse, #4f46e5 0%, transparent 70%)' }} />
           <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(99,102,241,0.06) 1px, transparent 0)',
-            backgroundSize: '32px 32px',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(99,102,241,0.04) 1px, transparent 0)',
+            backgroundSize: '40px 40px',
           }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold tracking-wide uppercase mb-6">
+        <div className="relative max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 text-indigo-300 text-xs font-semibold tracking-widest uppercase mb-8">
               <FlaskConical className="w-3 h-3" />
-              Biomarker-Driven Nutrition — The First of Its Kind
+              The only meal plan built from your blood work
             </span>
           </motion.div>
 
+          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tight mb-6"
-            style={{ fontFamily: "'DM Sans', sans-serif" }}
+            className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6"
           >
-            Your blood work<br />
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent">
-              becomes your meal plan.
+            Find out which of your<br />
+            <span style={{ background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #34d399 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              biomarkers to fix first.
             </span>
           </motion.h1>
 
+          {/* Sub */}
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-slate-400 text-lg sm:text-xl max-w-xl mx-auto mb-10 leading-relaxed"
           >
-            Upload any lab report. AI extracts your biomarkers — LDL, glucose, Vitamin D, CRP — and builds a 7-day meal plan specifically designed to fix what's off.
+            Answer 4 quick questions. Get a personalized insight into which biomarkers are likely affecting your health — and exactly what to eat to fix them.
           </motion.p>
 
+          {/* Single CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-6"
+            className="flex flex-col items-center gap-4"
           >
-            <Link to="/Onboarding"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-base hover:from-indigo-500 hover:to-violet-500 transition-all shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5">
-              Get My Personalized Plan Free
+            <Link to="/Quiz"
+              className="group inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg hover:from-indigo-500 hover:to-violet-500 transition-all shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-1">
+              Take the 60-second quiz
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/LabResults"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-white/10 text-slate-300 font-semibold text-base hover:bg-white/5 hover:border-white/20 transition-all">
-              <FlaskConical className="w-4 h-4" />
-              Upload Lab Results
-            </Link>
+            <p className="text-slate-600 text-sm">No account needed · See your results instantly</p>
           </motion.div>
 
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-            className="text-slate-600 text-sm">
-            No credit card required · Free forever plan available
-          </motion.p>
+          {/* Floating biomarker cards */}
+          <div className="mt-16 relative">
+            {/* Central result */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+              className="mx-auto max-w-sm p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide">After 8 weeks on VitaPlate</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'LDL',      from: '145',  to: '108',  unit: 'mg/dL', good: true  },
+                  { label: 'HbA1c',    from: '6.2',  to: '5.7',  unit: '%',     good: true  },
+                  { label: 'Vitamin D',from: '18',   to: '42',   unit: 'ng/mL', good: true  },
+                  { label: 'CRP',      from: '3.8',  to: '1.1',  unit: 'mg/L',  good: true  },
+                ].map(({ label, from, to, unit, good }) => (
+                  <div key={label} className="text-left">
+                    <p className="text-xs text-slate-500">{label}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-slate-600 text-sm line-through">{from}</span>
+                      <TrendingDown className="w-3 h-3 text-emerald-400" />
+                      <span className="text-emerald-400 font-bold text-sm">{to}</span>
+                      <span className="text-xs text-slate-600">{unit}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-3 text-center">Real results from following a VitaPlate biomarker plan</p>
+            </motion.div>
+          </div>
+
+          {/* Scroll cue */}
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2 }}
+            className="mt-12 flex justify-center">
+            <ChevronDown className="w-5 h-5 text-slate-700" />
+          </motion.div>
         </div>
-
-        {/* Hero visual */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8 }}
-          className="mt-16"
-        >
-          <HeroVisual />
-        </motion.div>
-
-        {/* Scroll cue */}
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2 }}
-          className="flex justify-center mt-12">
-          <ChevronDown className="w-5 h-5 text-slate-600" />
-        </motion.div>
       </section>
 
-      {/* How it works */}
-      <section className="py-24 px-4">
+      {/* ── How it works ──────────────────────────────────────────────────────── */}
+      <section className="py-24 px-4 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">How it works</h2>
-            <p className="text-slate-400 max-w-lg mx-auto">Three steps. No guesswork. No generic advice.</p>
+            <p className="text-xs text-indigo-400 font-semibold tracking-widest uppercase mb-3">The process</p>
+            <h2 className="text-3xl sm:text-4xl font-black">From blood panel to meal plan in 3 steps</h2>
           </div>
+
           <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-8 left-1/3 right-1/3 h-px bg-gradient-to-r from-indigo-500/50 via-violet-500/50 to-emerald-500/50" />
+            <div className="hidden md:block absolute top-10 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-px bg-gradient-to-r from-indigo-500/30 via-violet-500/30 to-emerald-500/30" />
 
             {[
-              { step: '01', icon: FlaskConical, color: '#6366f1', title: 'Upload your labs',       desc: 'Drag and drop any PDF from Quest, LabCorp, or your doctor. AI reads all 30+ markers in 15 seconds.' },
-              { step: '02', icon: Sparkles,     color: '#8b5cf6', title: 'AI analyzes your data',  desc: 'We identify which of your values are outside optimal range and what foods will help most.' },
-              { step: '03', icon: ChefHat,      color: '#10b981', title: 'Get your meal plan',     desc: '7 days of meals, each one chosen specifically to address your biomarkers. Grocery list included.' },
-            ].map(({ step, icon: Icon, color, title, desc }, i) => {
+              {
+                n: '01', color: '#6366f1',
+                icon: '🔬',
+                title: 'Take the quiz',
+                desc: 'Answer 4 questions about your health concerns. No account needed. See your biomarker insights in 60 seconds.',
+              },
+              {
+                n: '02', color: '#8b5cf6',
+                icon: '📋',
+                title: 'Upload your labs',
+                desc: 'Drag in any PDF from Quest, LabCorp, or your doctor. AI extracts every biomarker value automatically.',
+              },
+              {
+                n: '03', color: '#10b981',
+                icon: '🥗',
+                title: 'Get your plan',
+                desc: 'A 7-day meal plan where every single meal was chosen to improve your specific out-of-range markers.',
+              },
+            ].map(({ n, color, icon, title, desc }, i) => {
               const ref = useRef();
-              const inView = useInView(ref, { once: true });
+              const inView = useInView(ref, { once: true, margin: '-60px' });
               return (
-                <motion.div key={step} ref={ref}
-                  initial={{ opacity: 0, y: 30 }}
+                <motion.div key={n} ref={ref}
+                  initial={{ opacity: 0, y: 24 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: i * 0.15, duration: 0.5 }}
                   className="text-center relative"
                 >
-                  <div className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-xl"
-                    style={{ backgroundColor: color + '20', border: `1px solid ${color}30` }}>
-                    <Icon className="w-8 h-8" style={{ color }} />
+                  <div className="w-20 h-20 rounded-3xl mx-auto mb-5 flex items-center justify-center text-4xl shadow-xl"
+                    style={{ background: `linear-gradient(135deg, ${color}20, ${color}08)`, border: `1px solid ${color}25` }}>
+                    {icon}
                   </div>
-                  <div className="text-xs font-black tracking-widest uppercase mb-2" style={{ color }}>{step}</div>
-                  <h3 className="font-bold text-white text-lg mb-2">{title}</h3>
+                  <div className="text-xs font-black tracking-widest uppercase mb-2" style={{ color }}>{n}</div>
+                  <h3 className="font-bold text-white text-xl mb-2">{title}</h3>
                   <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
                 </motion.div>
               );
@@ -323,60 +249,89 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* ── What VitaPlate actually does ───────────────────────────────────────── */}
       <section className="py-24 px-4 border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Everything your health needs</h2>
-            <p className="text-slate-400 max-w-lg mx-auto">Built around your actual biology, not generic nutrition guidelines.</p>
+            <p className="text-xs text-indigo-400 font-semibold tracking-widest uppercase mb-3">The science</p>
+            <h2 className="text-3xl sm:text-4xl font-black">Every meal has a reason</h2>
+            <p className="text-slate-400 mt-3 max-w-lg mx-auto text-sm">
+              Generic nutrition apps give everyone the same advice. VitaPlate reads your blood work and tells each meal what job it has to do.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+          {/* Interactive biomarker cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: FlaskConical, accent: '#6366f1', title: 'Biomarker Extraction', description: 'Upload any blood panel PDF. AI extracts LDL, glucose, Vitamin D, CRP, thyroid markers, and 25+ more in seconds.' },
-              { icon: ChefHat,      accent: '#10b981', title: 'Personalized Meal Plans', description: 'Every meal is chosen to address your specific out-of-range markers. Not a template — your plan.' },
-              { icon: TrendingDown, accent: '#ef4444', title: 'Lab Trend Tracking', description: 'Upload a second set of labs and see: "Your LDL dropped 19% since following your plan." That\'s the proof.' },
-              { icon: Sparkles,     accent: '#8b5cf6', title: 'Supplement Recommendations', description: 'Based on your exact lab values. Low B12? Here\'s the right form, dose, and why it works for your level.' },
-              { icon: Star,         accent: '#f59e0b', title: 'Nova AI Coach', description: 'Ask anything about your labs or meals. Nova knows your biomarker history and gives advice specific to your data.' },
-              { icon: CheckCircle,  accent: '#06b6d4', title: 'Health Alerts Engine', description: 'Detects patterns in your eating that may worsen your lab values — before your next blood test.' },
-            ].map((f, i) => (
-              <FeatureCard key={f.title} {...f} delay={i * 0.08} />
-            ))}
+              { marker: 'High LDL Cholesterol', value: '145 mg/dL', foods: ['Salmon', 'Oats', 'Walnuts'], result: '↓ 25% in 8 weeks', color: '#ef4444' },
+              { marker: 'Prediabetic HbA1c', value: '6.1%', foods: ['Lentils', 'Quinoa', 'Broccoli'], result: '↓ 0.8% in 10 weeks', color: '#f59e0b' },
+              { marker: 'Low Vitamin D', value: '18 ng/mL', foods: ['Eggs', 'Mushrooms', 'Fatty fish'], result: '↑ to optimal in 6 weeks', color: '#8b5cf6' },
+              { marker: 'Elevated CRP', value: '3.2 mg/L', foods: ['Turmeric', 'Berries', 'Ginger'], result: '↓ 35% in 6 weeks', color: '#f97316' },
+              { marker: 'High Triglycerides', value: '210 mg/dL', foods: ['Olive oil', 'Fish', 'Nuts'], result: '↓ 45 mg/dL in 4 weeks', color: '#10b981' },
+              { marker: 'High TSH (thyroid)', value: '4.8 mIU/L', foods: ['Brazil nuts', 'Seaweed', 'Eggs'], result: 'Optimized thyroid support', color: '#06b6d4' },
+            ].map(({ marker, value, foods, result, color }, i) => {
+              const ref = useRef();
+              const inView = useInView(ref, { once: true, margin: '-40px' });
+              return (
+                <motion.div key={marker} ref={ref}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: i * 0.08, duration: 0.4 }}
+                  className="p-5 rounded-2xl border border-white/6 bg-white/2 hover:border-white/12 hover:bg-white/4 transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ background: `${color}15`, color }}>
+                      {value}
+                    </span>
+                    <span className="text-xs text-emerald-400 font-semibold">{result}</span>
+                  </div>
+                  <p className="font-semibold text-white text-sm mb-3">{marker}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {foods.map(f => (
+                      <span key={f} className="text-xs px-2 py-1 rounded-full bg-white/4 border border-white/6 text-slate-400">
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Differentiation — vs others */}
+      {/* ── Comparison ────────────────────────────────────────────────────────── */}
       <section className="py-24 px-4 border-t border-white/5">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Why VitaPlate is different</h2>
+            <h2 className="text-3xl sm:text-4xl font-black">No other app does this</h2>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-white/10">
+          <div className="rounded-2xl border border-white/8 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-white/5 border-b border-white/10">
-                  <th className="text-left px-6 py-4 text-slate-400 font-medium">Feature</th>
-                  <th className="px-6 py-4 text-indigo-400 font-bold">VitaPlate</th>
-                  <th className="px-6 py-4 text-slate-500 font-medium">MyFitnessPal</th>
-                  <th className="px-6 py-4 text-slate-500 font-medium">Noom</th>
+                <tr className="border-b border-white/6" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Feature</th>
+                  <th className="px-5 py-4 text-indigo-400 font-bold">VitaPlate</th>
+                  <th className="px-5 py-4 text-slate-500 font-medium text-xs">MyFitnessPal</th>
+                  <th className="px-5 py-4 text-slate-500 font-medium text-xs">Noom</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ['Reads your actual lab results',    true,  false, false],
-                  ['Meal plans from biomarkers',        true,  false, false],
-                  ['Predictive health alerts',          true,  false, false],
-                  ['Lab trend tracking',                true,  false, false],
-                  ['Supplement recommendations',        true,  false, false],
-                  ['Nutrition tracking',                true,  true,  true ],
-                  ['AI coaching',                       true,  false, true ],
-                  ['Wearable integration',              true,  true,  false],
+                  ['Reads your actual blood work',      true,  false, false],
+                  ['Meal plan from biomarker values',    true,  false, false],
+                  ['Tracks your lab trends over time',   true,  false, false],
+                  ['Predictive health alerts',           true,  false, false],
+                  ['Lab-specific supplement recs',       true,  false, false],
+                  ['AI nutrition coaching',              true,  false, true ],
+                  ['Nutrition tracking',                 true,  true,  true ],
+                  ['Free to start',                      true,  true,  false],
                 ].map(([feature, vp, mfp, noom], i) => (
-                  <tr key={feature} className={`border-b border-white/5 ${i % 2 === 0 ? 'bg-white/2' : ''}`}>
-                    <td className="px-6 py-3.5 text-slate-300">{feature}</td>
-                    <td className="px-6 py-3.5 text-center">{vp  ? <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" /> : <span className="text-slate-700">—</span>}</td>
-                    <td className="px-6 py-3.5 text-center">{mfp ? <CheckCircle className="w-4 h-4 text-slate-500 mx-auto" />   : <span className="text-slate-700">—</span>}</td>
-                    <td className="px-6 py-3.5 text-center">{noom? <CheckCircle className="w-4 h-4 text-slate-500 mx-auto" />   : <span className="text-slate-700">—</span>}</td>
+                  <tr key={i} className={`border-b border-white/4 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
+                    <td className="px-5 py-3.5 text-slate-300 text-sm">{feature}</td>
+                    <td className="px-5 py-3.5 text-center">{vp  ? <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" /> : <span className="text-slate-700 text-lg">—</span>}</td>
+                    <td className="px-5 py-3.5 text-center">{mfp ? <CheckCircle className="w-4 h-4 text-slate-600 mx-auto" />   : <span className="text-slate-700 text-lg">—</span>}</td>
+                    <td className="px-5 py-3.5 text-center">{noom? <CheckCircle className="w-4 h-4 text-slate-600 mx-auto" />   : <span className="text-slate-700 text-lg">—</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -385,42 +340,45 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
       <section className="py-24 px-4 border-t border-white/5">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-2xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="relative p-12 rounded-3xl overflow-hidden"
+            transition={{ duration: 0.5 }}
+            className="relative rounded-3xl overflow-hidden p-12 text-center"
             style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #0f172a 100%)' }}
           >
-            <div className="absolute inset-0 opacity-30" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(99,102,241,0.15) 1px, transparent 0)',
-              backgroundSize: '24px 24px',
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(99,102,241,0.12) 1px, transparent 0)',
+              backgroundSize: '28px 28px',
             }} />
             <div className="relative">
-              <div className="text-4xl mb-4">🧬</div>
-              <h2 className="text-3xl font-black mb-3">Ready to eat for your biology?</h2>
-              <p className="text-slate-400 mb-8">Upload your first lab report in under 2 minutes. Get a meal plan that actually responds to your blood work.</p>
-              <Link to="/Onboarding"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-bold text-base hover:from-indigo-400 hover:to-violet-400 transition-all shadow-2xl shadow-indigo-500/40 hover:-translate-y-0.5">
-                Start Free — No Credit Card
+              <span className="text-5xl block mb-4">🧬</span>
+              <h2 className="text-3xl font-black mb-3">Know your biomarkers.<br />Eat accordingly.</h2>
+              <p className="text-slate-400 mb-8 max-w-sm mx-auto">
+                Start with the 60-second quiz. No account needed. See your personalized biomarker insights instantly.
+              </p>
+              <Link to="/Quiz"
+                className="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-bold text-base hover:from-indigo-400 hover:to-violet-400 transition-all shadow-2xl shadow-indigo-500/40 hover:-translate-y-0.5">
+                Take the Free Quiz
                 <ArrowRight className="w-5 h-5" />
               </Link>
+              <p className="text-slate-600 text-xs mt-4">60 seconds · No credit card · Free plan available</p>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-10 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-sm">
+      <footer className="border-t border-white/5 py-8 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-600 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
               <span className="text-white font-black text-xs">V</span>
             </div>
-            <span>VitaPlate © 2026</span>
+            <span>VitaPlate © 2026 · AI Biomarker Nutrition</span>
           </div>
           <div className="flex gap-6">
             <Link to="/Pricing" className="hover:text-white transition-colors">Pricing</Link>
