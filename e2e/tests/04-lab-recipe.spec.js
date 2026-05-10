@@ -1,4 +1,4 @@
-import { test, expect, skipIfLoginPage } from '../fixtures/helpers.js';
+import { test, expect, skipIfLoginPage, goToLabUploadTab, fillAIRecipeIngredients } from '../fixtures/helpers.js';
 
 test.describe('Lab Results page', () => {
 
@@ -8,6 +8,7 @@ test.describe('Lab Results page', () => {
   });
 
   test('renders 4-tab layout', async ({ page }) => {
+    await page.getByRole('tablist').scrollIntoViewIfNeeded();
     await expect(page.getByRole('tab', { name: /Upload Labs/i })).toBeVisible();
     await expect(page.getByRole('tab', { name: /My Results/i })).toBeVisible();
     await expect(page.getByRole('tab', { name: /Trends/i })).toBeVisible();
@@ -15,18 +16,21 @@ test.describe('Lab Results page', () => {
   });
 
   test('upload tab shows drag-and-drop zone', async ({ page }) => {
+    await goToLabUploadTab(page);
     await expect(page.getByText('Drop your lab report here')).toBeVisible();
     await expect(page.getByText('Quest Diagnostics')).toBeVisible();
     await expect(page.getByText('LabCorp')).toBeVisible();
   });
 
   test('upload tab shows biomarker preview cards', async ({ page }) => {
+    await goToLabUploadTab(page);
     await expect(page.getByText('Cholesterol Panel')).toBeVisible();
     await expect(page.getByText('Blood Sugar')).toBeVisible();
     await expect(page.getByText('Vitamins & Minerals')).toBeVisible();
   });
 
   test('upload rejects non-PDF files', async ({ page }) => {
+    await goToLabUploadTab(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: 'test.txt',
@@ -37,6 +41,7 @@ test.describe('Lab Results page', () => {
   });
 
   test('My Results tab shows empty state when no labs', async ({ page }) => {
+    await page.getByRole('tablist').scrollIntoViewIfNeeded();
     await page.getByRole('tab', { name: /My Results/i }).click();
     const hasEmpty = await page.getByText('No lab results yet').isVisible().catch(() => false);
     const hasList = await page.locator('[class*="border-indigo-500"]').count() > 0;
@@ -70,7 +75,7 @@ test.describe('Recipe Generator', () => {
 
   test('generates recipe with valid inputs', async ({ page }) => {
     test.slow();
-    await page.locator('textarea').first().fill('chicken breast, garlic, olive oil, lemon, rosemary');
+    await fillAIRecipeIngredients(page, 'chicken breast, garlic, olive oil, lemon, rosemary');
     await page.getByRole('button', { name: /Generate Recipe/i }).click();
 
     await expect(page.getByText(/AI is crafting your recipe/i)).toBeVisible({ timeout: 30_000 });
@@ -81,7 +86,7 @@ test.describe('Recipe Generator', () => {
 
   test('generated recipe shows all sections', async ({ page }) => {
     test.slow();
-    await page.locator('textarea').first().fill('salmon, quinoa, spinach, lemon, garlic');
+    await fillAIRecipeIngredients(page, 'salmon, quinoa, spinach, lemon, garlic');
     await page.getByRole('button', { name: /Generate Recipe/i }).click();
 
     await expect(page.getByRole('heading', { name: /^Ingredients$/i })).toBeVisible({ timeout: 120_000 });

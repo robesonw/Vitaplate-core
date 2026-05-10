@@ -1,10 +1,11 @@
-import { test, expect, skipIfLoginPage } from '../fixtures/helpers.js';
+import { test, expect, skipIfLoginPage, openMobileNavIfNeeded } from '../fixtures/helpers.js';
 
 test.describe('Navigation', () => {
 
   test('sidebar renders with all group labels', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await openMobileNavIfNeeded(page, test.info().project.name);
     await expect(page.getByText('Health Intelligence', { exact: true })).toBeVisible();
     await expect(page.getByText('Meal Planning', { exact: true })).toBeVisible();
     await expect(page.getByText('Track & Improve', { exact: true })).toBeVisible();
@@ -15,6 +16,7 @@ test.describe('Navigation', () => {
   test('sidebar collapses to icon rail', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await openMobileNavIfNeeded(page, test.info().project.name);
     const collapseBtn = page.getByRole('button', { name: /collapse sidebar/i });
     if (!await collapseBtn.isVisible().catch(() => false)) test.skip(true, 'Collapse control not visible (viewport)');
     await collapseBtn.click();
@@ -26,6 +28,7 @@ test.describe('Navigation', () => {
   test('Lab Results nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await openMobileNavIfNeeded(page, test.info().project.name);
     await page.getByRole('link', { name: /Lab Results/ }).first().click();
     await expect(page).toHaveURL(/LabResults/);
   });
@@ -33,6 +36,7 @@ test.describe('Navigation', () => {
   test('Health Diet Hub nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await openMobileNavIfNeeded(page, test.info().project.name);
     await page.getByRole('link', { name: /Health Diet Hub/ }).first().click();
     await expect(page).toHaveURL(/HealthDietHub/);
   });
@@ -40,6 +44,7 @@ test.describe('Navigation', () => {
   test('Nova AI Coach nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await openMobileNavIfNeeded(page, test.info().project.name);
     await page.getByRole('link', { name: /Nova AI Coach/ }).first().click();
     await expect(page).toHaveURL(/AICoach/);
   });
@@ -47,13 +52,16 @@ test.describe('Navigation', () => {
   test('top bar shows breadcrumb and New Plan button', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    if (test.info().project.name === 'mobile') {
+      await expect(page.getByRole('button', { name: /open navigation menu/i })).toBeVisible();
+      return;
+    }
     await expect(page.getByText('New Plan', { exact: true })).toBeVisible();
     await expect(page.getByText('VitaPlate', { exact: true }).first()).toBeVisible();
   });
 
   test('core app routes load without error boundary', async ({ page }) => {
-    await page.goto('/Dashboard');
-    await skipIfLoginPage(page);
+    await page.goto('/Dashboard', { waitUntil: 'domcontentloaded' });
 
     const routes = [
       '/Dashboard', '/LabResults', '/HealthDietHub', '/AICoach',

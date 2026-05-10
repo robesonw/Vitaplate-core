@@ -149,11 +149,5 @@ function FeedbackButtonContent() {
 }
 
 export default function FeedbackButton() {
-  try {
-    useLocation();
-    useQuery;
-    return <FeedbackButtonContent />;
-  } catch {
-    return null;
-  }
+  return <FeedbackButtonContent />;
 }
