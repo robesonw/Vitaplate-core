@@ -21,5 +21,6 @@ FROM base AS production
 ENV NODE_ENV=production
 EXPOSE 3001
 
-# Run prisma db push to sync schema on every deploy, then start server
-CMD sh -c "npx prisma db push --accept-data-loss && node src/index.js"
+# Schema sync runs in Railway preDeployCommand (see railway.json) so the
+# server can bind immediately and pass /health checks.
+CMD ["node", "src/index.js"]
