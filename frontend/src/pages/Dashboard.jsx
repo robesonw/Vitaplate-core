@@ -245,38 +245,51 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Welcome hero — shows after onboarding, drives first plan generation */}
-      {(isWelcome || !onboardingComplete) && (
+      {/* Welcome / Generation banner */}
+      {(isWelcome || planGenerating || planReady) && (
         <div className="mb-6 overflow-hidden rounded-2xl shadow-xl" style={{background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1065 60%, #0f172a 100%)'}}>
-          <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-            <div className="flex items-start gap-4">
-              <div className="text-4xl">🧬</div>
-              <div>
-                <p className="font-bold text-white text-lg">Welcome to VitaPlate!</p>
-                <p className="text-indigo-300 text-sm mt-0.5">Your health profile is saved. Generate your first biomarker-optimized meal plan now — it takes about 20 seconds.</p>
-                <div className="flex flex-wrap gap-3 mt-3">
-                  <div className="flex items-center gap-1.5 text-xs text-indigo-300">
-                    <span className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs">✓</span>
-                    Profile saved
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-indigo-300">
-                    <span className="w-4 h-4 rounded-full bg-indigo-400 flex items-center justify-center text-white text-xs">2</span>
-                    Generate plan
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs">3</span>
-                    Upload labs
-                  </div>
+          <div className="p-5 flex flex-col sm:flex-row items-center gap-4">
+            {planReady ? (
+              <>
+                <span className="text-3xl flex-shrink-0">🎉</span>
+                <div className="flex-1">
+                  <p className="font-bold text-emerald-300 text-base">Your personalized meal plan is ready!</p>
+                  <p className="text-emerald-400/70 text-sm">Built specifically for your health goals — 7 days of biomarker-optimized meals.</p>
                 </div>
-              </div>
-            </div>
-            <a href="/HealthDietHub"
-              className="flex-shrink-0 bg-white text-indigo-700 font-bold px-5 py-3 rounded-xl text-sm hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2 whitespace-nowrap">
-              🥗 Generate My Meal Plan
-            </a>
+                <a href="/MealPlans" className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2">
+                  View My Plan →
+                </a>
+              </>
+            ) : planGenerating ? (
+              <>
+                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-indigo-200 text-base">Building your meal plan…</p>
+                  <p className="text-indigo-400/70 text-sm">AI is creating your personalized 7-day plan. Takes about 20 seconds.</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="text-3xl flex-shrink-0">🧬</span>
+                <div className="flex-1">
+                  <p className="font-bold text-white text-base">Welcome to VitaPlate!</p>
+                  <p className="text-indigo-300 text-sm">Your profile is saved. Start by uploading your labs or generating a meal plan.</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <a href="/LabResults" className="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-all border border-white/20">
+                    Upload Labs
+                  </a>
+                  <a href="/HealthDietHub" className="bg-white text-indigo-700 font-bold px-4 py-2.5 rounded-xl text-sm hover:bg-indigo-50 transition-all">
+                    Generate Plan →
+                  </a>
+                </div>
+              </>
+            )}
           </div>
-          <div className="h-1 bg-indigo-900/50">
-            <div className="h-full w-1/3 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full" />
+          <div className="h-0.5 bg-indigo-900/50">
+            <div className={`h-full bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full transition-all duration-1000 ${planReady ? 'w-full' : planGenerating ? 'w-2/3 animate-pulse' : 'w-1/3'}`} />
           </div>
         </div>
       )}
