@@ -1,125 +1,178 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44, supabase } from '@/api/base44Client';
+import { supabase } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, ArrowLeft, Check, Loader2, FlaskConical, ChefHat, Target } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Loader2, ChefHat } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-const STEPS = ['Health Goal', 'Conditions', 'Diet & Allergens', 'Budget'];
+// Map quiz concern values → healthGoal values
+const CONCERN_TO_GOAL = {
+  cholesterol:  'heart_health',
+  blood_sugar:  'blood_sugar_control',
+  energy:       'general_wellness',
+  inflammation: 'anti_inflammatory',
+  weight:       'weight_loss',
+  thyroid:      'general_wellness',
+  kidney:       'kidney_health',
+  general:      'general_wellness',
+};
+
+const DIET_MAP = {
+  none:        'custom',
+  vegetarian:  'vegetarian',
+  vegan:       'vegetarian',
+  gluten_free: 'custom',
+  low_carb:    'low-sugar',
+  halal:       'custom',
+};
 
 const healthGoals = [
-  { value: 'liver_health',       label: 'Liver Health',     emoji: '🫀', desc: 'Support liver detox & enzymes' },
-  { value: 'weight_loss',        label: 'Weight Loss',      emoji: '⚖️', desc: 'Reduce calories, boost metabolism' },
-  { value: 'blood_sugar_control',label: 'Blood Sugar',      emoji: '🩸', desc: 'Low-glycemic, steady energy' },
-  { value: 'muscle_gain',        label: 'Muscle Gain',      emoji: '💪', desc: 'High protein, strength focus' },
-  { value: 'heart_health',       label: 'Heart Health',     emoji: '❤️', desc: 'Omega-3s, low sodium' },
-  { value: 'kidney_health',      label: 'Kidney Health',    emoji: '🫘', desc: 'Low potassium, phosphorus' },
-  { value: 'anti_inflammatory',  label: 'Anti-Inflammatory',emoji: '🌿', desc: 'Reduce CRP, omega-3 focus' },
-  { value: 'general_wellness',   label: 'General Wellness', emoji: '✨', desc: 'Balanced, nutrient-rich' },
+  { value: 'heart_health',       label: 'Heart Health',      emoji: '❤️',  desc: 'Omega-3s, low sodium' },
+  { value: 'blood_sugar_control',label: 'Blood Sugar',       emoji: '🩸',  desc: 'Low-glycemic, steady energy' },
+  { value: 'weight_loss',        label: 'Weight Loss',       emoji: '⚖️',  desc: 'Reduce calories, boost metabolism' },
+  { value: 'muscle_gain',        label: 'Muscle Gain',       emoji: '💪',  desc: 'High protein, strength focus' },
+  { value: 'anti_inflammatory',  label: 'Anti-Inflammatory', emoji: '🌿',  desc: 'Reduce CRP, omega-3 focus' },
+  { value: 'kidney_health',      label: 'Kidney Health',     emoji: '🫘',  desc: 'Low potassium, phosphorus' },
+  { value: 'liver_health',       label: 'Liver Health',      emoji: '🫀',  desc: 'Support liver detox & enzymes' },
+  { value: 'general_wellness',   label: 'General Wellness',  emoji: '✨',  desc: 'Balanced, nutrient-rich' },
 ];
 
 const conditions = [
-  { field: 'diabetesType',    label: 'Diabetes / Prediabetes', options: [{ v: 'pre_diabetes', l: 'Prediabetes' }, { v: 'type2', l: 'Type 2 Diabetes' }, { v: 'type1', l: 'Type 1 Diabetes' }] },
-  { field: 'heartCondition',  label: 'Heart Condition',        options: [{ v: 'high_cholesterol', l: 'High Cholesterol' }, { v: 'hypertension', l: 'Hypertension' }, { v: 'heart_disease', l: 'Heart Disease' }] },
-  { field: 'kidneyStage',     label: 'Kidney Disease',         options: [{ v: 'stage_1', l: 'Stage 1' }, { v: 'stage_2', l: 'Stage 2' }, { v: 'stage_3', l: 'Stage 3' }] },
-  { field: 'thyroidCondition',label: 'Thyroid Condition',      options: [{ v: 'hypothyroid', l: 'Hypothyroidism' }, { v: 'hyperthyroid', l: 'Hyperthyroidism' }, { v: 'hashimotos', l: "Hashimoto's" }] },
+  { field: 'diabetesType',    label: 'Diabetes / Prediabetes',
+    options: [{ v: 'pre_diabetes', l: 'Prediabetes' }, { v: 'type2', l: 'Type 2' }, { v: 'type1', l: 'Type 1' }] },
+  { field: 'heartCondition',  label: 'Heart Condition',
+    options: [{ v: 'high_cholesterol', l: 'High Cholesterol' }, { v: 'hypertension', l: 'Hypertension' }, { v: 'heart_disease', l: 'Heart Disease' }] },
+  { field: 'kidneyStage',     label: 'Kidney Disease',
+    options: [{ v: 'stage_1', l: 'Stage 1' }, { v: 'stage_2', l: 'Stage 2' }, { v: 'stage_3', l: 'Stage 3' }] },
+  { field: 'thyroidCondition',label: 'Thyroid Condition',
+    options: [{ v: 'hypothyroid', l: 'Hypothyroidism' }, { v: 'hyperthyroid', l: 'Hyperthyroidism' }, { v: 'hashimotos', l: "Hashimoto's" }] },
 ];
 
-const dietTypes = [
-  { value: 'liver-centric', label: 'Liver-Centric',       emoji: '🥦', desc: 'Cruciferous veg, antioxidants' },
-  { value: 'low-sugar',     label: 'Low Sugar',            emoji: '🚫', desc: 'Minimal refined carbs' },
-  { value: 'vegetarian',    label: 'Vegetarian',           emoji: '🌱', desc: 'Plant-based, no meat' },
-  { value: 'custom',        label: 'No Restriction',       emoji: '🍽️', desc: 'Balanced mixed diet' },
-];
+const allergenList = ['nuts', 'dairy', 'gluten', 'shellfish', 'eggs', 'soy', 'fish', 'sesame'];
 
-const allergenList = ['nuts', 'dairy', 'gluten', 'shellfish', 'eggs', 'soy', 'fish', 'sesame', 'peanuts', 'wheat'];
+// 3 steps only: Conditions → Allergens → Budget
+// Health goal pre-filled from quiz; diet pre-filled from quiz
+const STEPS = ['Conditions', 'Allergens & Budget', 'All Set'];
 
 export default function Onboarding() {
-  const navigate  = useNavigate();
-  const queryClient = useQueryClient();
-  const [step, setStep]               = useState(0);
-  const [healthGoal, setHealthGoal]   = useState('');
+  const navigate     = useNavigate();
+  const queryClient  = useQueryClient();
+  const [step, setStep]     = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Pre-fill from quiz sessionStorage
+  const quizData = (() => {
+    try { return JSON.parse(sessionStorage.getItem('vp_quiz') || '{}'); }
+    catch { return {}; }
+  })();
+
+  const [healthGoal, setHealthGoal] = useState(
+    CONCERN_TO_GOAL[quizData.concern] || ''
+  );
+  const [dietType, setDietType] = useState(
+    DIET_MAP[quizData.diet] || 'custom'
+  );
   const [selectedConditions, setSelectedConditions] = useState({});
-  const [dietType, setDietType]       = useState('custom');
-  const [allergens, setAllergens]     = useState([]);
+  const [allergens, setAllergens]   = useState([]);
   const [weeklyBudget, setWeeklyBudget] = useState(100);
-  const [numPeople, setNumPeople]     = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState('');
+  const [numPeople, setNumPeople]   = useState(1);
 
-  const toggleAllergen = (a) => setAllergens(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]);
-  const toggleCondition = (field, value) => {
-    setSelectedConditions(prev => ({ ...prev, [field]: prev[field] === value ? '' : value }));
-  };
+  // If no health goal from quiz, ask on step -1 (prepend a goal step)
+  const needsGoalStep = !healthGoal;
+  const [goalStep, setGoalStep] = useState(needsGoalStep);
 
-  const canNext = () => {
-    if (step === 0) return !!healthGoal;
-    return true;
-  };
+  const toggleAllergen = (a) =>
+    setAllergens(p => p.includes(a) ? p.filter(x => x !== a) : [...p, a]);
+  const toggleCondition = (field, value) =>
+    setSelectedConditions(p => ({ ...p, [field]: p[field] === value ? '' : value }));
 
+  // ─── Save and navigate ──────────────────────────────────────────────────────
   const handleFinish = async () => {
-    setIsGenerating(true);
+    setIsSaving(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        // Not logged in — send to sign in first, then come back
+        sessionStorage.setItem('vp_onboarding_pending', '1');
+        navigate('/Dashboard');
+        return;
+      }
+
       const prefs = {
-        healthGoal,
+        healthGoal:          healthGoal || 'general_wellness',
         dietaryRestrictions: dietType !== 'custom' ? dietType : '',
         allergens,
         numPeople,
         weeklyBudget,
-        cookingTime: 'any',
-        skillLevel: 'intermediate',
-        diabetesType:     selectedConditions.diabetesType    || null,
-        heartCondition:   selectedConditions.heartCondition  || null,
-        kidneyStage:      selectedConditions.kidneyStage     || null,
-        thyroidCondition: selectedConditions.thyroidCondition|| null,
+        cookingTime:         'any',
+        skillLevel:          'intermediate',
+        diabetesType:        selectedConditions.diabetesType    || null,
+        heartCondition:      selectedConditions.heartCondition  || null,
+        kidneyStage:         selectedConditions.kidneyStage     || null,
+        thyroidCondition:    selectedConditions.thyroidCondition || null,
       };
 
-      // Save preferences
-      await base44.entities.UserPreferences.create(prefs);
-
-      // Mark onboarding complete
-      const { data: { session } } = await supabase.auth.getSession();
-      await fetch(`${API}/api/user/onboarding/complete`, {
+      // Save preferences (non-blocking — navigate regardless)
+      const prefsPromise = fetch(`${API}/api/user/preferences`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      });
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body:    JSON.stringify(prefs),
+      }).catch(e => console.warn('Prefs save failed:', e.message));
 
+      // Mark onboarding complete (non-blocking)
+      const completePromise = fetch(`${API}/api/user/onboarding/complete`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      }).catch(e => console.warn('Onboarding complete failed:', e.message));
+
+      // Navigate immediately — don't wait for saves
+      sessionStorage.removeItem('vp_quiz');
+      navigate('/Dashboard?welcome=1');
+
+      // Let saves finish in background
+      await Promise.all([prefsPromise, completePromise]);
       queryClient.invalidateQueries({ queryKey: ['userPreferences'] });
       queryClient.invalidateQueries({ queryKey: ['userSettings'] });
 
-      // Navigate to Dashboard — plan generation happens from there
-      navigate('/Dashboard?welcome=1');
     } catch (err) {
-      // Even if saving fails, get user into the app
-      console.warn('Prefs save failed (non-fatal):', err.message);
+      console.warn('Onboarding error (navigating anyway):', err.message);
       navigate('/Dashboard?welcome=1');
     } finally {
-      setIsGenerating(false);
+      setIsSaving(false);
     }
   };
 
+  // ─── Step dots ──────────────────────────────────────────────────────────────
+  const allSteps = goalStep ? ['Your Goal', ...STEPS] : STEPS;
+  const currentStepIndex = goalStep ? step : step; // step 0 = goal if goalStep
+
   const StepDots = () => (
     <div className="flex items-center justify-center gap-2 mb-8">
-      {STEPS.map((s, i) => (
-        <div key={s} className="flex items-center gap-2">
-          <div className={`flex items-center justify-center rounded-full font-semibold text-xs transition-all
-            ${i < step ? 'w-6 h-6 bg-emerald-500 text-white' :
-              i === step ? 'w-8 h-8 bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' :
-              'w-6 h-6 bg-slate-200 text-slate-400'}`}>
-            {i < step ? <Check className="w-3 h-3" /> : i + 1}
+      {allSteps.map((s, i) => {
+        const isDone   = i < step;
+        const isActive = i === step;
+        return (
+          <div key={s} className="flex items-center gap-2">
+            <div className={`flex items-center justify-center rounded-full font-semibold text-xs transition-all ${
+              isDone   ? 'w-6 h-6 bg-emerald-500 text-white' :
+              isActive ? 'w-8 h-8 bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' :
+                         'w-6 h-6 bg-slate-700 text-slate-500'
+            }`}>
+              {isDone ? <Check className="w-3 h-3" /> : i + 1}
+            </div>
+            {i < allSteps.length - 1 && (
+              <div className={`w-8 h-0.5 rounded-full ${isDone ? 'bg-emerald-400' : 'bg-slate-700'}`} />
+            )}
           </div>
-          {i < STEPS.length - 1 && <div className={`w-8 h-0.5 rounded-full ${i < step ? 'bg-emerald-400' : 'bg-slate-200'}`} />}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 
@@ -135,7 +188,11 @@ export default function Onboarding() {
             </div>
             <span className="text-white font-bold text-xl">VitaPlate</span>
           </div>
-          <p className="text-slate-400 text-sm">Let's build your biomarker-optimized nutrition plan</p>
+          <p className="text-slate-400 text-sm">
+            {quizData.concern
+              ? "Almost there — a few details to personalize your plan"
+              : "Let's build your biomarker-optimized nutrition plan"}
+          </p>
         </div>
 
         <StepDots />
@@ -148,8 +205,9 @@ export default function Onboarding() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Step 0 — Health Goal */}
-            {step === 0 && (
+
+            {/* ── Goal step (only shown if not pre-filled from quiz) ─────────── */}
+            {goalStep && step === 0 && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-white mb-1">What's your primary health goal?</h2>
@@ -157,12 +215,8 @@ export default function Onboarding() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {healthGoals.map(g => (
-                    <button key={g.value} onClick={() => setHealthGoal(g.value)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all ${
-                        healthGoal === g.value
-                          ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
-                          : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
-                      }`}>
+                    <button key={g.value} onClick={() => { setHealthGoal(g.value); setStep(1); }}
+                      className="p-4 rounded-xl border-2 border-slate-700 bg-slate-800/50 hover:border-indigo-500 hover:bg-indigo-500/10 text-left transition-all">
                       <span className="text-2xl mb-2 block">{g.emoji}</span>
                       <p className="font-semibold text-white text-sm">{g.label}</p>
                       <p className="text-slate-400 text-xs mt-0.5">{g.desc}</p>
@@ -172,12 +226,12 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Step 1 — Conditions */}
-            {step === 1 && (
+            {/* ── Step: Conditions ─────────────────────────────────────────────── */}
+            {step === (goalStep ? 1 : 0) && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-white mb-1">Any health conditions?</h2>
-                  <p className="text-slate-400 text-sm">Optional — but dramatically improves personalization</p>
+                  <p className="text-slate-400 text-sm">Optional — skip if none apply</p>
                 </div>
                 <div className="space-y-3">
                   {conditions.map(c => (
@@ -198,139 +252,83 @@ export default function Onboarding() {
                     </div>
                   ))}
                 </div>
-                <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-                  <div className="flex items-center gap-2 text-indigo-300 text-xs">
-                    <FlaskConical className="w-4 h-4 flex-shrink-0" />
-                    <span>You can also upload lab results later — your meal plan will automatically adapt to your exact biomarker values.</span>
-                  </div>
-                </div>
               </div>
             )}
 
-            {/* Step 2 — Diet & Allergens */}
-            {step === 2 && (
+            {/* ── Step: Allergens + Budget ─────────────────────────────────────── */}
+            {step === (goalStep ? 2 : 1) && (
               <div className="space-y-6">
-                <div className="text-center mb-2">
-                  <h2 className="text-2xl font-bold text-white mb-1">Diet preferences & allergens</h2>
-                  <p className="text-slate-400 text-sm">We'll never include foods that don't work for you</p>
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-white mb-1">Final details</h2>
+                  <p className="text-slate-400 text-sm">Allergens and budget — then you're in</p>
                 </div>
+
+                {/* Allergens */}
                 <div>
-                  <p className="text-slate-300 text-sm font-medium mb-3">Diet style</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {dietTypes.map(d => (
-                      <button key={d.value} onClick={() => setDietType(d.value)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all ${
-                          dietType === d.value
-                            ? 'border-emerald-500 bg-emerald-500/10'
-                            : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
-                        }`}>
-                        <span className="text-xl block mb-1">{d.emoji}</span>
-                        <p className="font-semibold text-white text-sm">{d.label}</p>
-                        <p className="text-slate-400 text-xs">{d.desc}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-slate-300 text-sm font-medium mb-3">Allergens to avoid</p>
+                  <p className="text-slate-300 text-sm font-medium mb-3">Foods to avoid</p>
                   <div className="flex flex-wrap gap-2">
                     {allergenList.map(a => (
                       <button key={a} onClick={() => toggleAllergen(a)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
+                        className={`px-3 py-2 rounded-lg text-xs font-medium capitalize transition-all ${
                           allergens.includes(a)
-                            ? 'bg-red-500 text-white'
-                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                            : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
                         }`}>
                         {allergens.includes(a) ? '✗ ' : ''}{a}
                       </button>
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Step 3 — Budget */}
-            {step === 3 && (
-              <div className="space-y-6">
-                <div className="text-center mb-2">
-                  <h2 className="text-2xl font-bold text-white mb-1">Budget & serving size</h2>
-                  <p className="text-slate-400 text-sm">So your grocery list stays realistic</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6 space-y-6">
+                {/* Budget */}
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5 space-y-4">
                   <div>
-                    <Label className="text-slate-300 text-sm mb-3 block">Weekly grocery budget</Label>
+                    <p className="text-slate-300 text-sm font-medium mb-2">Weekly grocery budget</p>
                     <div className="flex items-center gap-4">
-                      <span className="text-3xl font-bold text-white">${weeklyBudget}</span>
-                      <div className="flex-1">
-                        <input type="range" min="40" max="400" step="10"
-                          value={weeklyBudget} onChange={e => setWeeklyBudget(+e.target.value)}
-                          className="w-full accent-indigo-500" />
-                        <div className="flex justify-between text-xs text-slate-500 mt-1">
-                          <span>$40</span><span>$400</span>
-                        </div>
-                      </div>
+                      <span className="text-2xl font-bold text-white w-20">${weeklyBudget}</span>
+                      <input type="range" min="40" max="400" step="10"
+                        value={weeklyBudget} onChange={e => setWeeklyBudget(+e.target.value)}
+                        className="flex-1 accent-indigo-500" />
                     </div>
                   </div>
                   <div>
-                    <Label className="text-slate-300 text-sm mb-3 block">Number of people</Label>
-                    <div className="flex items-center gap-3">
+                    <p className="text-slate-300 text-sm font-medium mb-2">Cooking for</p>
+                    <div className="flex gap-2">
                       {[1,2,3,4,5].map(n => (
                         <button key={n} onClick={() => setNumPeople(n)}
                           className={`w-10 h-10 rounded-lg font-bold text-sm transition-all ${
-                            numPeople === n ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            numPeople === n ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                           }`}>{n}</button>
                       ))}
+                      <span className="text-slate-400 text-sm self-center ml-1">
+                        {numPeople === 1 ? 'person' : 'people'}
+                      </span>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-                  <p className="text-slate-300 text-sm font-medium mb-2">Your plan summary</p>
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div className="p-2 bg-slate-700/50 rounded-lg">
-                      <p className="text-indigo-400 font-bold">{healthGoals.find(g => g.value === healthGoal)?.emoji}</p>
-                      <p className="text-xs text-slate-400 mt-1">{healthGoals.find(g => g.value === healthGoal)?.label}</p>
-                    </div>
-                    <div className="p-2 bg-slate-700/50 rounded-lg">
-                      <p className="text-emerald-400 font-bold text-sm">{dietTypes.find(d => d.value === dietType)?.emoji}</p>
-                      <p className="text-xs text-slate-400 mt-1">{dietTypes.find(d => d.value === dietType)?.label}</p>
-                    </div>
-                    <div className="p-2 bg-slate-700/50 rounded-lg">
-                      <p className="text-amber-400 font-bold">${weeklyBudget}</p>
-                      <p className="text-xs text-slate-400 mt-1">for {numPeople} {numPeople === 1 ? 'person' : 'people'}</p>
-                    </div>
-                  </div>
-                  {Object.values(selectedConditions).filter(Boolean).length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {Object.values(selectedConditions).filter(Boolean).map(v => (
-                        <Badge key={v} className="text-xs bg-indigo-500/20 text-indigo-300">{v.replace(/_/g,' ')}</Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
 
-            {/* Step 4 — Summary + Get Started */}
-            {step === 3 && (
-              <div className="space-y-6">
+            {/* ── Final step: Summary + CTA ─────────────────────────────────────── */}
+            {step === (goalStep ? 3 : 2) && (
+              <div className="space-y-5">
                 <div className="text-center">
                   <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-500/30">
                     <ChefHat className="w-10 h-10 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">You're all set!</h2>
-                  <p className="text-slate-400 text-sm">Here's your health profile. We'll use this to personalize everything.</p>
+                  <h2 className="text-2xl font-bold text-white mb-1">You're all set!</h2>
+                  <p className="text-slate-400 text-sm">Your profile is saved. Your meal plan will start building the moment you enter.</p>
                 </div>
 
-                {/* Summary card */}
-                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5 space-y-3">
+                {/* Summary */}
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 space-y-2.5">
                   {[
-                    { label: 'Goal', value: healthGoals.find(g => g.value === healthGoal)?.label },
-                    { label: 'Diet', value: dietTypes.find(d => d.value === dietType)?.label },
-                    { label: 'Budget', value: `$${weeklyBudget}/week for ${numPeople} ${numPeople === 1 ? 'person' : 'people'}` },
+                    { label: 'Goal',    value: healthGoals.find(g => g.value === healthGoal)?.label },
+                    { label: 'Budget',  value: `$${weeklyBudget}/week · ${numPeople} ${numPeople === 1 ? 'person' : 'people'}` },
                     allergens.length > 0 && { label: 'Avoids', value: allergens.join(', ') },
                     Object.values(selectedConditions).filter(Boolean).length > 0 && {
                       label: 'Conditions',
-                      value: Object.values(selectedConditions).filter(Boolean).map(v => v.replace(/_/g, ' ')).join(', ')
+                      value: Object.values(selectedConditions).filter(Boolean).map(v => v.replace(/_/g, ' ')).join(', '),
                     },
                   ].filter(Boolean).map(({ label, value }) => (
                     <div key={label} className="flex justify-between items-center text-sm">
@@ -340,44 +338,40 @@ export default function Onboarding() {
                   ))}
                 </div>
 
-                <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-center">
-                  <p className="text-indigo-300 text-sm font-medium">🥗 Your first meal plan will be ready to generate inside the app</p>
-                  <p className="text-indigo-400/60 text-xs mt-1">Takes about 20 seconds — powered by AI and your biomarker profile</p>
-                </div>
-
-                {isGenerating ? (
-                  <div className="flex items-center justify-center gap-3 py-2">
-                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
-                    <p className="text-indigo-300 text-sm">Setting up your profile...</p>
-                  </div>
-                ) : (
-                  <Button onClick={handleFinish}
-                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold text-base shadow-xl shadow-indigo-500/30">
-                    Enter VitaPlate
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                )}
+                <Button
+                  onClick={handleFinish}
+                  disabled={isSaving}
+                  className="w-full h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-base shadow-xl shadow-indigo-500/30 disabled:opacity-60"
+                >
+                  {isSaving
+                    ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Saving your profile...</>
+                    : <>Enter VitaPlate <ArrowRight className="w-5 h-5 ml-2" /></>
+                  }
+                </Button>
+                <p className="text-center text-slate-600 text-xs">Your meal plan builds automatically in the background</p>
               </div>
             )}
+
           </motion.div>
         </AnimatePresence>
 
-        {/* Nav buttons */}
-        {step < 4 && (
+        {/* Nav — only show Continue/Back when NOT on the final step and NOT on goal-select step */}
+        {!(goalStep && step === 0) && step !== (goalStep ? 3 : 2) && (
           <div className="flex gap-3 mt-8">
-            {step > 0 && (
+            {step > (goalStep ? 1 : 0) && (
               <Button variant="outline" onClick={() => setStep(s => s - 1)}
                 className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800 bg-transparent">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
             )}
-            <Button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40">
-              {'Continue'}
+            <Button onClick={() => setStep(s => s + 1)}
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">
+              Continue
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         )}
+
       </div>
     </div>
   );
