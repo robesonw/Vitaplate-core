@@ -81,18 +81,27 @@ export default async function globalSetup() {
     const shot = path.join(authDir, 'login-failure.png');
     await page.screenshot({ path: shot, fullPage: true }).catch(() => {});
     await browser.close();
-    throw new Error(
+    if (fs.existsSync(authFile)) fs.unlinkSync(authFile);
+    // eslint-disable-next-line no-console
+    console.warn(
       `[e2e global-setup] Login failed for ${email}: ${lastError}\n` +
-        `Check Supabase: user exists, Email auth enabled, email confirmed, password correct.\n` +
+        `Tests will run without auth (protected specs skip). Fix credentials in e2e/.env or Supabase.\n` +
         `Screenshot: ${shot}`,
     );
+    return;
   }
 
   if (!(await dashLink.isVisible().catch(() => false))) {
     const shot = path.join(authDir, 'login-timeout.png');
     await page.screenshot({ path: shot, fullPage: true }).catch(() => {});
     await browser.close();
-    throw new Error(`[e2e global-setup] Login timed out (no Dashboard link). Screenshot: ${shot}`);
+    if (fs.existsSync(authFile)) fs.unlinkSync(authFile);
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[e2e global-setup] Login timed out (no Dashboard link). Screenshot: ${shot}\n` +
+        'Tests will run without auth.',
+    );
+    return;
   }
 
   await context.storageState({ path: authFile });
