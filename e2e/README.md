@@ -8,7 +8,10 @@ Playwright test suite covering all critical user flows.
 cd e2e
 npm install
 npx playwright install chromium
+cp .env.example .env   # then set TEST_EMAIL and TEST_PASSWORD (gitignored)
 ```
+
+On each `npm test`, **global setup** signs in (if `.env` has credentials) and saves `e2e/.auth/user.json` so protected routes run for real. If login fails, fix the Supabase user (confirmed email, correct password, Email provider enabled).
 
 ## Running Tests
 
@@ -38,8 +41,8 @@ npx playwright test --grep "generates recipe"
 |---|---|---|
 | `BASE_URL` | `https://www.vitaplate.ai` | Frontend URL |
 | `API_URL` | `https://vitaplate-core-production.up.railway.app` | Backend URL |
-| `TEST_EMAIL` | `test@vitaplate.ai` | Test user email |
-| `TEST_PASSWORD` | `TestPassword123!` | Test user password |
+| `TEST_EMAIL` | _(empty)_ | Supabase user email (set in `e2e/.env`) |
+| `TEST_PASSWORD` | _(empty)_ | Supabase user password (set in `e2e/.env`) |
 
 ## Test Files
 
