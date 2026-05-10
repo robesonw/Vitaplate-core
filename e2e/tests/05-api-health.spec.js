@@ -36,9 +36,10 @@ test.describe('API health checks', () => {
   });
 
   test('CORS headers present on API responses', async ({ request }) => {
-    const res = await request.options(`${API_URL}/health`, {
+    const res = await request.fetch(`${API_URL}/health`, {
+      method: 'OPTIONS',
       headers: {
-        'Origin': 'https://www.vitaplate.ai',
+        Origin: 'https://www.vitaplate.ai',
         'Access-Control-Request-Method': 'GET',
       },
     });

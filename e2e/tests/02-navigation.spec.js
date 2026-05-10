@@ -70,7 +70,7 @@ test.describe('Navigation', () => {
       '/Settings', '/HelpCenter', '/ReferFriend', '/Pricing',
     ];
 
-    const errors: string[] = [];
+    const errors = [];
     for (const route of routes) {
       await page.goto(route);
       // Check no error boundary visible
