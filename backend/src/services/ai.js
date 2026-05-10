@@ -59,11 +59,26 @@ export function buildProfileHash(preferences, biomarkers = {}) {
 
 // ─── Credit Management ────────────────────────────────────────────────────────
 export async function checkAndDecrementCredits(userId, isAdmin = false) {
-  // Admin/founder bypass
+  // Admin/founder bypass — check both the passed flag AND the env var directly
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.FOUNDER_EMAIL;
   if (isAdmin) return { allowed: true, used: 0, limit: 999, plan: 'admin' };
+  
+  // Secondary check: look up user email and compare with ADMIN_EMAIL
+  if (adminEmail) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (user?.email === adminEmail) return { allowed: true, used: 0, limit: 999, plan: 'admin' };
+  }
 
-  const settings = await prisma.userSettings.findUnique({ where: { userId } });
-  if (!settings) return { allowed: false, reason: 'No settings found' };
+  let settings = await prisma.userSettings.findUnique({ where: { userId } });
+  
+  // Auto-create settings for new users who don't have a row yet
+  if (!settings) {
+    settings = await prisma.userSettings.upsert({
+      where:  { userId },
+      create: { userId, subscriptionPlan: 'free', aiCreditsUsed: 0, lastCreditReset: new Date() },
+      update: {},
+    });
+  }
 
   const plan  = settings.subscriptionPlan;
   const limit = AI_CREDIT_LIMITS[plan] ?? 1;

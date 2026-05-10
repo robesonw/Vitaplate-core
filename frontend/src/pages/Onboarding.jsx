@@ -102,10 +102,13 @@ export default function Onboarding() {
       });
 
       const plan = await res.json();
-      // Don't block onboarding completion if plan generation fails
-      // Users can generate from HealthDietHub
       if (!res.ok) {
+        // Plan generation failed — log it but continue to dashboard
+        // Show a helpful warning rather than silently failing
         console.warn('Plan generation failed (non-fatal):', plan.error);
+        if (plan.error?.includes('AI generation')) {
+          toast.warning('Plan saved — you can generate meals from Health Diet Hub');
+        }
       }
 
       setGenerationStep('Finishing setup...');
