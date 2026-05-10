@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-const STEPS = ['Health Goal', 'Conditions', 'Diet & Allergens', 'Budget', 'Generate'];
+const STEPS = ['Health Goal', 'Conditions', 'Diet & Allergens', 'Budget'];
 
 const healthGoals = [
   { value: 'liver_health',       label: 'Liver Health',     emoji: '🫀', desc: 'Support liver detox & enzymes' },
@@ -69,11 +69,9 @@ export default function Onboarding() {
   const handleFinish = async () => {
     setIsGenerating(true);
     try {
-      // 1. Save preferences
-      setGenerationStep('Saving your health profile...');
       const prefs = {
         healthGoal,
-        dietaryRestrictions: dietType !== 'custom' ? dietType : '',  // schema field name
+        dietaryRestrictions: dietType !== 'custom' ? dietType : '',
         allergens,
         numPeople,
         weeklyBudget,
@@ -84,52 +82,28 @@ export default function Onboarding() {
         kidneyStage:      selectedConditions.kidneyStage     || null,
         thyroidCondition: selectedConditions.thyroidCondition|| null,
       };
+
+      // Save preferences
       await base44.entities.UserPreferences.create(prefs);
 
-      // 2. Generate first meal plan via real backend
-      setGenerationStep('Generating your personalized meal plan...');
+      // Mark onboarding complete
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      const res = await fetch(`${API}/api/meal-plans/generate`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          name:        `My ${healthGoals.find(g => g.value === healthGoal)?.label || 'Personalized'} Plan`,
-          preferences: prefs,
-          biomarkers:  {},
-        }),
-      });
-
-      const plan = await res.json();
-      if (!res.ok) {
-        // Plan generation failed — log it but continue to dashboard
-        // Show a helpful warning rather than silently failing
-        console.warn('Plan generation failed (non-fatal):', plan.error);
-        if (plan.error?.includes('AI generation')) {
-          toast.warning('Plan saved — you can generate meals from Health Diet Hub');
-        }
-      }
-
-      setGenerationStep('Finishing setup...');
-
-      // 3. Mark onboarding complete
       await fetch(`${API}/api/user/onboarding/complete`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
       });
 
       queryClient.invalidateQueries({ queryKey: ['userPreferences'] });
       queryClient.invalidateQueries({ queryKey: ['userSettings'] });
-      queryClient.invalidateQueries({ queryKey: ['mealPlans'] });
 
-      toast.success('Your meal plan is ready! 🎉');
-      navigate('/Dashboard');
+      // Navigate to Dashboard — plan generation happens from there
+      navigate('/Dashboard?welcome=1');
     } catch (err) {
-      toast.error(err.message || 'Something went wrong. Please try again.');
+      // Even if saving fails, get user into the app
+      console.warn('Prefs save failed (non-fatal):', err.message);
+      navigate('/Dashboard?welcome=1');
     } finally {
       setIsGenerating(false);
-      setGenerationStep('');
     }
   };
 
@@ -336,40 +310,53 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Step 4 — Generate */}
-            {step === 4 && (
-              <div className="text-center space-y-6">
-                <div>
+            {/* Step 4 — Summary + Get Started */}
+            {step === 3 && (
+              <div className="space-y-6">
+                <div className="text-center">
                   <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-500/30">
                     <ChefHat className="w-10 h-10 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Ready to generate your plan!</h2>
-                  <p className="text-slate-400">Our AI will create a 7-day personalized meal plan optimized for your health goals{Object.values(selectedConditions).filter(Boolean).length > 0 ? ' and conditions' : ''}.</p>
+                  <h2 className="text-2xl font-bold text-white mb-2">You're all set!</h2>
+                  <p className="text-slate-400 text-sm">Here's your health profile. We'll use this to personalize everything.</p>
+                </div>
+
+                {/* Summary card */}
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5 space-y-3">
+                  {[
+                    { label: 'Goal', value: healthGoals.find(g => g.value === healthGoal)?.label },
+                    { label: 'Diet', value: dietTypes.find(d => d.value === dietType)?.label },
+                    { label: 'Budget', value: `$${weeklyBudget}/week for ${numPeople} ${numPeople === 1 ? 'person' : 'people'}` },
+                    allergens.length > 0 && { label: 'Avoids', value: allergens.join(', ') },
+                    Object.values(selectedConditions).filter(Boolean).length > 0 && {
+                      label: 'Conditions',
+                      value: Object.values(selectedConditions).filter(Boolean).map(v => v.replace(/_/g, ' ')).join(', ')
+                    },
+                  ].filter(Boolean).map(({ label, value }) => (
+                    <div key={label} className="flex justify-between items-center text-sm">
+                      <span className="text-slate-400">{label}</span>
+                      <span className="text-white font-medium capitalize">{value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-center">
+                  <p className="text-indigo-300 text-sm font-medium">🥗 Your first meal plan will be ready to generate inside the app</p>
+                  <p className="text-indigo-400/60 text-xs mt-1">Takes about 20 seconds — powered by AI and your biomarker profile</p>
                 </div>
 
                 {isGenerating ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-center gap-3">
-                      <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
-                      <p className="text-indigo-300 font-medium">{generationStep}</p>
-                    </div>
-                    <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full animate-pulse" style={{ width: '60%' }} />
-                    </div>
-                    <p className="text-slate-500 text-sm">This takes about 20 seconds — we're building something personalized just for you.</p>
+                  <div className="flex items-center justify-center gap-3 py-2">
+                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                    <p className="text-indigo-300 text-sm">Setting up your profile...</p>
                   </div>
                 ) : (
                   <Button onClick={handleFinish}
                     className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold text-base shadow-xl shadow-indigo-500/30">
-                    Generate My Meal Plan
+                    Enter VitaPlate
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 )}
-
-                <div className="flex items-center justify-center gap-2 text-slate-500 text-xs">
-                  <Target className="w-3 h-3" />
-                  <span>You can refine everything in your settings anytime</span>
-                </div>
               </div>
             )}
           </motion.div>
@@ -386,7 +373,7 @@ export default function Onboarding() {
             )}
             <Button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
               className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40">
-              {step === 3 ? 'Review & Generate' : 'Continue'}
+              {'Continue'}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

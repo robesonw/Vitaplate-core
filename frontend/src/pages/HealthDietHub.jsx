@@ -442,11 +442,9 @@ Every single meal MUST reflect these adjustments. Prioritize foods that correct 
   };
 
   const handleGenerate = async () => {
-    // Guard: require saved preferences
+    // If no prefs yet, generate with defaults (don't block)
     if (!userPrefs) {
-      toast.error('Complete your profile first to get a personalized plan!', { duration: 4000 });
-      navigate('/Onboarding');
-      return;
+      console.log('No saved preferences — generating with current UI selections');
     }
 
     // Save health conditions to preferences
@@ -499,22 +497,39 @@ Every single meal MUST reflect these adjustments. Prioritize foods that correct 
     const planNameLabel = `${goalDescription} Plan - ${new Date().toLocaleDateString()}`;
 
     try {
+      // Get auth token
+      const { supabase: _sb } = await import('@/api/base44Client');
+      const { data: { session } } = await _sb.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        toast.error('Please sign in to generate a meal plan');
+        return;
+      }
+
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/meal-plans/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           days: daysCount,
-          planName: planNameLabel,
+          name: planNameLabel,
           preferences: preferencesPayload,
-          labResults: latestLabBiomarkers,
+          biomarkers: latestLabBiomarkers || {},
         }),
       });
 
       if (!res.ok) {
-        throw new Error(`Server responded with ${res.status}`);
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 402) {
+          throw new Error(errData.error || 'Monthly AI generation limit reached — upgrade to Pro for more');
+        }
+        throw new Error(errData.error || `Generation failed (${res.status}) — please try again`);
       }
 
       const data = await res.json();
+      // Backend returns plan directly (not nested in .meal_plan)
       const response = data.meal_plan || data;
 
       // Ensure we only get the exact number of days requested

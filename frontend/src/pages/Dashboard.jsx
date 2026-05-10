@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import QuickStartChecklist from '../components/onboarding/QuickStartChecklist';
+import { useRef, useEffect } from 'react';
 import OnboardingTour from '../components/onboarding/OnboardingTour';
 import StreakCard from '../components/dashboard/StreakCard';
 import StreakCounter from '../components/streaks/StreakCounter';
@@ -47,6 +48,57 @@ export default function Dashboard() {
   });
 
   const { isComplete: onboardingComplete, currentStep } = useOnboarding();
+  // Detect fresh signup from onboarding
+  const location = useLocation();
+  const isWelcome = new URLSearchParams(location.search).get('welcome') === '1';
+  const [planGenerating, setPlanGenerating] = React.useState(false);
+  const [planReady,      setPlanReady]      = React.useState(false);
+  const generationTriggered = useRef(false);
+
+  // Trigger background plan generation on first landing after onboarding
+  useEffect(() => {
+    if (!isWelcome || generationTriggered.current) return;
+    generationTriggered.current = true;
+
+    const generateInBackground = async () => {
+      try {
+        setPlanGenerating(true);
+        const { supabase } = await import('@/api/base44Client');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+        // Get user preferences to build the plan
+        const prefsRes = await fetch(`${apiUrl}/api/user/preferences`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const prefs = prefsRes.ok ? await prefsRes.json() : {};
+
+        // Generate plan
+        const res = await fetch(`${apiUrl}/api/meal-plans/generate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            name:        `My ${(prefs.healthGoal || 'Personalized').replace(/_/g, ' ')} Plan`,
+            preferences: prefs,
+            biomarkers:  {},
+          }),
+        });
+
+        if (res.ok) {
+          setPlanReady(true);
+          queryClient.invalidateQueries({ queryKey: ['mealPlans'] });
+        }
+      } catch (err) {
+        console.warn('Background generation failed:', err.message);
+      } finally {
+        setPlanGenerating(false);
+      }
+    };
+
+    generateInBackground();
+  }, [isWelcome]);
 
   const { data: sharedPlans = [] } = useQuery({
     queryKey: ['sharedPlans'],
@@ -193,19 +245,39 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Onboarding Resume Banner */}
-      {!onboardingComplete && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white flex items-center justify-between shadow-lg">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🚀</span>
-            <div>
-              <p className="font-semibold">Complete your health profile to unlock personalized meal plans</p>
-              <p className="text-indigo-200 text-sm">Takes 3 minutes · Upload your labs · Get a meal plan built for your biomarkers</p>
+      {/* Welcome hero — shows after onboarding, drives first plan generation */}
+      {(isWelcome || !onboardingComplete) && (
+        <div className="mb-6 overflow-hidden rounded-2xl shadow-xl" style={{background: 'linear-gradient(135deg, #1e1b4b 0%, #2e1065 60%, #0f172a 100%)'}}>
+          <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🧬</div>
+              <div>
+                <p className="font-bold text-white text-lg">Welcome to VitaPlate!</p>
+                <p className="text-indigo-300 text-sm mt-0.5">Your health profile is saved. Generate your first biomarker-optimized meal plan now — it takes about 20 seconds.</p>
+                <div className="flex flex-wrap gap-3 mt-3">
+                  <div className="flex items-center gap-1.5 text-xs text-indigo-300">
+                    <span className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs">✓</span>
+                    Profile saved
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-indigo-300">
+                    <span className="w-4 h-4 rounded-full bg-indigo-400 flex items-center justify-center text-white text-xs">2</span>
+                    Generate plan
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <span className="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs">3</span>
+                    Upload labs
+                  </div>
+                </div>
+              </div>
             </div>
+            <a href="/HealthDietHub"
+              className="flex-shrink-0 bg-white text-indigo-700 font-bold px-5 py-3 rounded-xl text-sm hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2 whitespace-nowrap">
+              🥗 Generate My Meal Plan
+            </a>
           </div>
-          <a href="/Onboarding" className="bg-white text-indigo-600 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-indigo-50 transition-colors flex-shrink-0 ml-4">
-            Continue Setup →
-          </a>
+          <div className="h-1 bg-indigo-900/50">
+            <div className="h-full w-1/3 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full" />
+          </div>
         </div>
       )}
       <div className="space-y-6">
