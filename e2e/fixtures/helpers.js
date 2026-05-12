@@ -51,7 +51,7 @@ export async function skipIfLoginPage(page) {
 
     const inApp =
       (await page.getByRole('button', { name: /open navigation menu/i }).isVisible().catch(() => false))
-      || (await page.getByText('Health Intelligence', { exact: true }).isVisible().catch(() => false))
+      || (await page.getByText('Health Intelligence', { exact: true }).first().isVisible().catch(() => false))
       || (await page.getByRole('heading', { name: /^Lab Results$/i }).isVisible().catch(() => false))
       || (await page.getByRole('heading', { name: /AI Recipe Generator/i }).isVisible().catch(() => false));
     if (inApp) return;
@@ -60,13 +60,49 @@ export async function skipIfLoginPage(page) {
   }
 }
 
+/** Skip Joyride + expand nav so e2e is deterministic (desktop + mobile DOM duplicate sidebars). */
+export async function installE2EGuards(page) {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('vitaplate_tour_completed', 'true');
+      localStorage.setItem('vp_nav_collapsed', 'false');
+      localStorage.setItem(
+        'vp_nav_groups',
+        JSON.stringify({ health: true, meals: true, track: true, community: true, account: true }),
+      );
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+/** If a tour overlay is already up (stale storage), dismiss it. */
+export async function dismissJoyrideIfPresent(page) {
+  const skip = page.getByRole('button', { name: /skip tour/i });
+  if (await skip.isVisible().catch(() => false)) await skip.click();
+}
+
+/** Sonner toasts sit above the header and block clicks on small viewports. */
+export async function dismissBlockingOverlays(page) {
+  await dismissToasts(page);
+  await dismissJoyrideIfPresent(page);
+}
+
+/** Desktop sidebar is `aside` first; mobile nav copy lives in the second `aside` (drawer). */
+export function appSidebar(page, projectName) {
+  return projectName === 'mobile' ? page.locator('aside').nth(1) : page.locator('aside').first();
+}
+
 /** Mobile layout hides the desktop sidebar; open the drawer before nav assertions / clicks. */
 export async function openMobileNavIfNeeded(page, projectName) {
   if (projectName !== 'mobile') return;
+  await dismissBlockingOverlays(page);
   const menu = page.getByRole('button', { name: /open navigation menu/i });
   if (await menu.isVisible().catch(() => false)) {
-    await menu.click();
-    await page.getByText('Health Intelligence', { exact: true }).waitFor({ state: 'visible', timeout: 15_000 });
+    await menu.click({ force: true });
+    await appSidebar(page, projectName)
+      .getByText('Health Intelligence', { exact: true })
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 }
 
@@ -77,9 +113,18 @@ export async function goToLabUploadTab(page) {
   await tab.click();
 }
 
+/** Ingredients textarea — prefer `data-testid` when deployed, else placeholder (older builds). */
+export function recipeIngredientsField(page) {
+  return page.getByTestId('ai-recipe-ingredients').or(page.getByPlaceholder(/e\.g\., chicken breast/i));
+}
+
+export function recipeGenerateButton(page) {
+  return page.getByTestId('ai-generate-recipe').or(page.getByRole('button', { name: /Generate Recipe/i }));
+}
+
 /** Ingredients field is a textarea below optional name input — target by placeholder for stable mobile fills. */
 export async function fillAIRecipeIngredients(page, text) {
-  const ta = page.getByPlaceholder(/e\.g\., chicken breast/i);
+  const ta = recipeIngredientsField(page);
   await ta.scrollIntoViewIfNeeded();
   await ta.fill(text);
 }

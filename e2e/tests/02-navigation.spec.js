@@ -1,57 +1,93 @@
-import { test, expect, skipIfLoginPage, openMobileNavIfNeeded } from '../fixtures/helpers.js';
+import {
+  test,
+  expect,
+  skipIfLoginPage,
+  openMobileNavIfNeeded,
+  installE2EGuards,
+  dismissBlockingOverlays,
+  appSidebar,
+} from '../fixtures/helpers.js';
 
 test.describe('Navigation', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await installE2EGuards(page);
+  });
 
   test('sidebar renders with all group labels', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await dismissBlockingOverlays(page);
     await openMobileNavIfNeeded(page, test.info().project.name);
-    await expect(page.getByText('Health Intelligence', { exact: true })).toBeVisible();
-    await expect(page.getByText('Meal Planning', { exact: true })).toBeVisible();
-    await expect(page.getByText('Track & Improve', { exact: true })).toBeVisible();
-    await expect(page.getByText('Community', { exact: true })).toBeVisible();
-    await expect(page.getByText('Account', { exact: true })).toBeVisible();
+    const nav = appSidebar(page, test.info().project.name);
+    await expect(nav.getByText('Health Intelligence', { exact: true })).toBeVisible();
+    await expect(nav.getByText('Meal Planning', { exact: true })).toBeVisible();
+    await expect(nav.getByText('Track & Improve', { exact: true })).toBeVisible();
+    await expect(nav.getByText('Community', { exact: true })).toBeVisible();
+    await expect(nav.getByText('Account', { exact: true })).toBeVisible();
   });
 
   test('sidebar collapses to icon rail', async ({ page }) => {
+    if (test.info().project.name === 'mobile') {
+      test.skip(true, 'Collapse control is desktop-only (hidden below lg breakpoint)');
+    }
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
-    await openMobileNavIfNeeded(page, test.info().project.name);
-    const collapseBtn = page.getByRole('button', { name: /collapse sidebar/i });
+    await dismissBlockingOverlays(page);
+    const desktopSidebar = page.locator('aside').first();
+    const collapseBtn = desktopSidebar.getByRole('button', { name: /collapse sidebar/i });
     if (!await collapseBtn.isVisible().catch(() => false)) test.skip(true, 'Collapse control not visible (viewport)');
     await collapseBtn.click();
-    const sidebar = page.locator('aside').first();
-    const box = await sidebar.boundingBox();
-    expect(box?.width).toBeLessThan(80);
+    await expect(page.getByRole('button', { name: /expand sidebar/i })).toBeVisible({ timeout: 10_000 });
+    await expect(desktopSidebar).toHaveClass(/w-16/);
   });
 
   test('Lab Results nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await dismissBlockingOverlays(page);
     await openMobileNavIfNeeded(page, test.info().project.name);
-    await page.getByRole('link', { name: /Lab Results/ }).first().click();
+    const labLink = appSidebar(page, test.info().project.name).getByRole('link', { name: /Lab Results/ });
+    if (test.info().project.name === 'mobile') {
+      await labLink.evaluate((el) => el.click());
+    } else {
+      await labLink.click();
+    }
     await expect(page).toHaveURL(/LabResults/);
   });
 
   test('Health Diet Hub nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await dismissBlockingOverlays(page);
     await openMobileNavIfNeeded(page, test.info().project.name);
-    await page.getByRole('link', { name: /Health Diet Hub/ }).first().click();
+    const hubLink = appSidebar(page, test.info().project.name).getByRole('link', { name: /Health Diet Hub/ });
+    if (test.info().project.name === 'mobile') {
+      await hubLink.evaluate((el) => el.click());
+    } else {
+      await hubLink.click();
+    }
     await expect(page).toHaveURL(/HealthDietHub/);
   });
 
   test('Nova AI Coach nav item navigates correctly', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await dismissBlockingOverlays(page);
     await openMobileNavIfNeeded(page, test.info().project.name);
-    await page.getByRole('link', { name: /Nova AI Coach/ }).first().click();
+    const coachLink = appSidebar(page, test.info().project.name).getByRole('link', { name: /Nova AI Coach/ });
+    if (test.info().project.name === 'mobile') {
+      await coachLink.evaluate((el) => el.click());
+    } else {
+      await coachLink.click();
+    }
     await expect(page).toHaveURL(/AICoach/);
   });
 
   test('top bar shows breadcrumb and New Plan button', async ({ page }) => {
     await page.goto('/Dashboard');
     await skipIfLoginPage(page);
+    await dismissBlockingOverlays(page);
     if (test.info().project.name === 'mobile') {
       await expect(page.getByRole('button', { name: /open navigation menu/i })).toBeVisible();
       return;

@@ -49,6 +49,13 @@ export default async function globalSetup() {
 
   const loginWall = await page.getByRole('heading', { name: /^welcome back$/i }).isVisible().catch(() => false);
   if (!loginWall) {
+    await page.evaluate(() => {
+      try {
+        localStorage.setItem('vitaplate_tour_completed', 'true');
+      } catch {
+        /* ignore */
+      }
+    });
     await context.storageState({ path: authFile });
     await browser.close();
     // eslint-disable-next-line no-console
@@ -103,6 +110,14 @@ export default async function globalSetup() {
     );
     return;
   }
+
+  await page.evaluate(() => {
+    try {
+      localStorage.setItem('vitaplate_tour_completed', 'true');
+    } catch {
+      /* ignore */
+    }
+  });
 
   await context.storageState({ path: authFile });
   await browser.close();

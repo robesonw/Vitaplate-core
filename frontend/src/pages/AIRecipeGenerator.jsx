@@ -138,9 +138,11 @@ Provide:
     setSavingImage(true);
     try {
       // Use Unsplash for food images
-      const result = { url: `https://source.unsplash.com/600x400/?food,recipe,${encodeURIComponent(recipeName || 'healthy')}`, success: true }; void ({
-        prompt: `Professional food photography of ${generatedRecipe.name}, ${form.cuisine} cuisine, appetizing presentation, natural lighting, high quality, restaurant style plating`
-      });
+      const dish = generatedRecipe.name || form.recipeName || 'healthy';
+      const result = {
+        url: `https://source.unsplash.com/600x400/?food,recipe,${encodeURIComponent(dish)}`,
+        success: true,
+      };
       
       if (result?.url) {
         setGeneratedRecipe({ ...generatedRecipe, imageUrl: result.url });
@@ -373,6 +375,7 @@ Provide:
               <div>
                 <Label>Available Ingredients *</Label>
                 <Textarea
+                  data-testid="ai-recipe-ingredients"
                   placeholder="e.g., chicken breast, tomatoes, garlic, olive oil..."
                   value={form.ingredients}
                   onChange={(e) => setForm({ ...form, ingredients: e.target.value })}
@@ -414,6 +417,8 @@ Provide:
               </div>
 
               <Button
+                type="button"
+                data-testid="ai-generate-recipe"
                 onClick={handleGenerate}
                 disabled={generating}
                 className="w-full bg-gradient-to-r from-indigo-600 to-purple-600"
