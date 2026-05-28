@@ -301,7 +301,12 @@ Meal plan: ${JSON.stringify(mealPlan?.days?.slice(0, 3))}`,
     }],
   });
 
-  return JSON.parse(response.content[0].text);
+  try {
+    const raw = response.content[0].text.replace(/```json|```/g, '').trim();
+    return JSON.parse(raw);
+  } catch {
+    return { produce: [], proteins: [], dairy: [], grains: [], pantry: [], frozen: [] };
+  }
 }
 
 // ─── Single Meal Swap (Haiku) ─────────────────────────────────────────────────
@@ -324,7 +329,13 @@ Return same JSON structure as input meal.`,
     }],
   });
 
-  return JSON.parse(response.content[0].text);
+  try {
+    const raw = response.content[0].text.replace(/```json|```/g, '').trim();
+    const match = raw.match(/\{[\s\S]*\}/);
+    return JSON.parse(match ? match[0] : raw);
+  } catch {
+    return mealToReplace; // fallback: return same meal unchanged
+  }
 }
 
 // ─── Supplement Recommendations (Rules Engine — FREE) ─────────────────────────
