@@ -78,6 +78,53 @@ export default function Onboarding() {
     DIET_MAP[quizData.diet] || 'custom'
   );
   const [selectedConditions, setSelectedConditions] = useState({});
+  const [autoCompleting, setAutoCompleting] = useState(false);
+
+  // If user came from quiz — they already answered the key questions.
+  // Skip all onboarding steps and go directly to Dashboard.
+  useEffect(() => {
+    if (!quizData.concern) return; // No quiz data — show normal onboarding
+
+    const autoComplete = async () => {
+      setAutoCompleting(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) { navigate('/Dashboard?welcome=1'); return; }
+
+        const prefs = {
+          healthGoal:          CONCERN_TO_GOAL[quizData.concern] || 'general_wellness',
+          dietaryRestrictions: DIET_MAP[quizData.diet] || '',
+          allergens:           [],
+          numPeople:           1,
+          weeklyBudget:        100,
+          cookingTime:         'any',
+          skillLevel:          'intermediate',
+        };
+
+        // Save prefs + mark complete in parallel — fire and forget
+        Promise.all([
+          fetch(`${API}/api/user/preferences`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(prefs),
+          }),
+          fetch(`${API}/api/user/onboarding/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          }),
+        ]).catch(e => console.warn('Auto-complete save failed (non-fatal):', e.message));
+
+        sessionStorage.removeItem('vp_quiz');
+        navigate('/Dashboard?welcome=1');
+      } catch (err) {
+        console.warn('Auto-complete failed, showing onboarding:', err.message);
+        setAutoCompleting(false);
+      }
+    };
+
+    autoComplete();
+  }, []); // run once on mount
   const [allergens, setAllergens]   = useState([]);
   const [weeklyBudget, setWeeklyBudget] = useState(100);
   const [numPeople, setNumPeople]   = useState(1);
@@ -175,6 +222,22 @@ export default function Onboarding() {
       })}
     </div>
   );
+
+  // Show a brief loading screen while auto-completing for quiz users
+  if (autoCompleting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-indigo-500/30">
+            <span className="text-white font-black text-2xl">V</span>
+          </div>
+          <div className="w-8 h-8 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-indigo-300 font-medium">Setting up your profile…</p>
+          <p className="text-slate-500 text-sm">Taking you to your dashboard</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">

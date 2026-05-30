@@ -136,7 +136,7 @@ function ResultsScreen({ answers }) {
   const navigate = useNavigate();
 
   const handleGetPlan = () => {
-    // Store quiz answers in sessionStorage so Onboarding can pre-fill
+    // Store quiz answers — Onboarding reads these and auto-completes instantly
     sessionStorage.setItem('vp_quiz', JSON.stringify(answers));
     navigate('/Onboarding');
   };
@@ -258,7 +258,7 @@ function ResultsScreen({ answers }) {
       >
         <button onClick={handleGetPlan}
           className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-base hover:from-indigo-500 hover:to-violet-500 transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
-          Unlock My Full Meal Plan — Free
+          Get My Personalized Plan — Free
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
         <p className="text-center text-slate-600 text-xs">
