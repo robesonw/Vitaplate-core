@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, Zap, Moon, Heart } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { formatDistanceToNow } from 'date-fns';
+import { safeRelativeTime } from '@/lib/dateUtils';
 
 export default function ActivitySummaryCard() {
   const today = new Date().toISOString().split('T')[0];
@@ -52,7 +52,7 @@ export default function ActivitySummaryCard() {
   };
 
   const activityBadge = getActivityBadge(todaySync.steps || 0);
-  const lastSyncTime = formatDistanceToNow(new Date(todaySync.synced_at), { addSuffix: true });
+  const lastSyncTime = safeRelativeTime(todaySync.synced_at ?? todaySync.syncedAt);
 
   return (
     <Card>

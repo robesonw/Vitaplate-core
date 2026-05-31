@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, MessageSquare, TrendingUp, Trophy, Target, Flame, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/dateUtils';
 import NutritionLeaderboard from '../components/leaderboard/NutritionLeaderboard';
 
 export default function ProgressFeed() {
@@ -139,7 +139,7 @@ export default function ProgressFeed() {
                         <div>
                           <CardTitle className="text-lg">{progress.title}</CardTitle>
                           <p className="text-sm text-slate-500 mt-1">
-                            by {progress.author_name} • {format(new Date(progress.created_date), 'MMM d, yyyy')}
+                            by {progress.author_name} • {safeFormat(progress.created_date ?? progress.createdDate, 'MMM d, yyyy')}
                           </p>
                         </div>
                       </div>

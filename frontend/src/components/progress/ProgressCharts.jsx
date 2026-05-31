@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingDown, TrendingUp } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { safeFormatISO } from '@/lib/dateUtils';
 
 export default function ProgressCharts({ entries = [], streakData = {} }) {
   // Prepare chart data
@@ -10,7 +10,7 @@ export default function ProgressCharts({ entries = [], streakData = {} }) {
     return [...entries]
       .sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date))
       .map(entry => ({
-        date: format(parseISO(entry.entry_date), 'MMM d'),
+        date: safeFormatISO(entry.entry_date ?? entry.entryDate, 'MMM d'),
         fullDate: entry.entry_date,
         weight: entry.weight,
         bodyFat: entry.body_fat_percentage,

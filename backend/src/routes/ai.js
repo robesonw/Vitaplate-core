@@ -12,7 +12,7 @@ router.post('/invoke', requireAuth, async (req, res) => {
     if (!prompt) return res.status(400).json({ error: 'prompt required' });
 
     const systemPrompt = response_json_schema
-      ? 'Respond ONLY with valid JSON matching the provided schema. No prose, no markdown.'
+      ? `You are a helpful nutrition and health assistant for VitaPlate. Respond ONLY with a single valid JSON object that conforms EXACTLY to the JSON schema below. Use the schema's exact property names, nesting, and value types. Do not add extra properties, prose, explanations, or markdown code fences.\n\nJSON schema:\n${JSON.stringify(response_json_schema)}`
       : 'You are a helpful nutrition and health assistant for VitaPlate.';
 
     const response = await anthropic.messages.create({

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Smile, Zap } from 'lucide-react';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/dateUtils';
 
 const energyEmojis = ['😴', '😒', '😐', '😊', '🔥'];
 const moodEmojis = ['😢', '😕', '😐', '🙂', '😄'];
@@ -79,7 +79,7 @@ export default function ProgressTimeline({ entries = [] }) {
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="font-semibold text-slate-900">
-                            {format(new Date(entry.entry_date), 'MMM d, yyyy')}
+                            {safeFormat(entry.entry_date ?? entry.entryDate, 'MMM d, yyyy')}
                           </p>
                           {weightLossText && (
                             <p className={`text-sm font-medium ${change.weight.isLoss ? 'text-emerald-600' : 'text-amber-600'}`}>

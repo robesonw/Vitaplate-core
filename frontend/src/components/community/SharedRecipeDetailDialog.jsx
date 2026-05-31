@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Flame, Clock, ChefHat, Wrench, ThumbsUp, MessageCircle, Send, Heart, Utensils, Calendar, Sparkles, ShoppingCart, RefreshCw, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
+import { safeRelativeTime } from '@/lib/dateUtils';
 import ReviewSection from '../reviews/ReviewSection';
 
 export default function SharedRecipeDetailDialog({ recipe, open, onOpenChange, comments: allComments = [] }) {
@@ -569,7 +569,7 @@ export default function SharedRecipeDetailDialog({ recipe, open, onOpenChange, c
                       <div className="flex items-start justify-between mb-1">
                         <span className="font-medium text-sm text-slate-900">{comment.author_name}</span>
                         <span className="text-xs text-slate-500">
-                          {formatDistanceToNow(new Date(comment.created_date), { addSuffix: true })}
+                          {safeRelativeTime(comment.created_date ?? comment.createdDate)}
                         </span>
                       </div>
                       <p className="text-sm text-slate-700">{comment.comment}</p>

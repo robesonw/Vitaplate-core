@@ -27,6 +27,23 @@ const difficultyLevels = ['Easy', 'Medium', 'Hard'];
 
 const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert'];
 
+// Defensive: the AI occasionally returns objects/arrays where the UI expects a string
+// (e.g. instructions as [{ step, instruction }]). Coerce anything to renderable text so a
+// malformed response degrades gracefully instead of crashing into the error boundary.
+const toText = (value) => {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.map(toText).filter(Boolean).join(', ');
+  if (typeof value === 'object') {
+    const preferred =
+      value.instruction ?? value.text ?? value.description ?? value.name ?? value.item ?? value.step;
+    if (preferred != null) return toText(preferred);
+    return Object.values(value).map(toText).filter(Boolean).join(' ');
+  }
+  return String(value);
+};
+
 export default function AIRecipeGenerator() {
   const [generating, setGenerating] = useState(false);
   const [generatedRecipe, setGeneratedRecipe] = useState(null);
@@ -506,8 +523,8 @@ Provide:
                   <CardHeader className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-2xl mb-2">{generatedRecipe.name}</CardTitle>
-                        <p className="text-slate-600">{generatedRecipe.description}</p>
+                        <CardTitle className="text-2xl mb-2">{toText(generatedRecipe.name)}</CardTitle>
+                        <p className="text-slate-600">{toText(generatedRecipe.description)}</p>
                       </div>
                     </div>
 
@@ -527,11 +544,11 @@ Provide:
                     <div className="flex items-center gap-4 text-sm">
                       <span className="flex items-center gap-1 text-slate-600">
                         <Clock className="w-4 h-4" />
-                        Prep: {generatedRecipe.prepTime}
+                        Prep: {toText(generatedRecipe.prepTime)}
                       </span>
                       <span className="flex items-center gap-1 text-slate-600">
                         <Utensils className="w-4 h-4" />
-                        Cook: {generatedRecipe.cookTime}
+                        Cook: {toText(generatedRecipe.cookTime)}
                       </span>
                       <span className="flex items-center gap-1 text-slate-600">
                         <ChefHat className="w-4 h-4" />
@@ -621,7 +638,7 @@ Provide:
                           <Heart className="w-4 h-4" />
                           Health Benefits
                         </h3>
-                        <p className="text-sm text-emerald-700">{generatedRecipe.healthBenefits}</p>
+                        <p className="text-sm text-emerald-700">{toText(generatedRecipe.healthBenefits)}</p>
                       </div>
                     )}
 
@@ -637,7 +654,17 @@ Provide:
                               {idx + 1}
                             </span>
                             <span className="text-slate-700">
-                              <span className="font-medium">{ing.quantity}</span> {ing.item}
+                              {typeof ing === 'object' && ing !== null ? (
+                                <>
+                                  <span className="font-medium">
+                                    {[toText(ing.quantity), toText(ing.unit)].filter(Boolean).join(' ')}
+                                  </span>{' '}
+                                  {toText(ing.item ?? ing.name)}
+                                  {ing.notes ? <span className="text-slate-500"> ({toText(ing.notes)})</span> : null}
+                                </>
+                              ) : (
+                                toText(ing)
+                              )}
                             </span>
                           </li>
                         ))}
@@ -655,7 +682,7 @@ Provide:
                             <span className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 text-white text-sm flex items-center justify-center font-medium">
                               {idx + 1}
                             </span>
-                            <p className="text-slate-700 flex-1 pt-0.5">{step}</p>
+                            <p className="text-slate-700 flex-1 pt-0.5">{toText(step)}</p>
                           </li>
                         ))}
                       </ol>
@@ -667,7 +694,7 @@ Provide:
                         <Separator />
                         <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
                           <h3 className="font-semibold text-amber-900 mb-2">Chef's Tips</h3>
-                          <p className="text-sm text-amber-700">{generatedRecipe.tips}</p>
+                          <p className="text-sm text-amber-700">{toText(generatedRecipe.tips)}</p>
                         </div>
                       </>
                     )}

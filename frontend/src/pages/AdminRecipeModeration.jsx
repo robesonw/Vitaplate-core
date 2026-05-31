@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CheckCircle, XCircle, Eye, Clock, Flame, ChefHat } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
+import { safeRelativeTime } from '@/lib/dateUtils';
 
 export default function AdminRecipeModeration() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -94,7 +94,7 @@ export default function AdminRecipeModeration() {
               <div>
                 <h3 className="font-semibold text-slate-900">{recipe.name}</h3>
                 <p className="text-xs text-slate-500">
-                  by {recipe.author_name} • {formatDistanceToNow(new Date(recipe.created_date), { addSuffix: true })}
+                  by {recipe.author_name} • {safeRelativeTime(recipe.created_date ?? recipe.createdDate)}
                 </p>
               </div>
               <Badge
@@ -283,7 +283,7 @@ export default function AdminRecipeModeration() {
                   <div>
                     <p className="text-sm text-slate-600">Submitted</p>
                     <p className="font-medium">
-                      {formatDistanceToNow(new Date(selectedRecipe.created_date), { addSuffix: true })}
+                      {safeRelativeTime(selectedRecipe.created_date ?? selectedRecipe.createdDate)}
                     </p>
                   </div>
                 </div>

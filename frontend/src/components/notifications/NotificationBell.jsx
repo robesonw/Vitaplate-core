@@ -8,6 +8,21 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 
+// The API returns notification fields in camelCase (createdDate, read, actionUrl).
+// These accessors tolerate either casing so the bell never reads `undefined`.
+const notifIsRead = (n) => n.read ?? n.is_read ?? false;
+const notifActionUrl = (n) => n.actionUrl ?? n.action_url ?? null;
+const notifCreatedAt = (n) => n.createdDate ?? n.created_date ?? n.createdAt ?? null;
+
+// Guard against missing/invalid timestamps — date-fns throws "Invalid time value"
+// on an invalid Date, which would crash the whole app shell.
+function safeRelativeTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return formatDistanceToNow(date, { addSuffix: true });
+}
+
 function NotificationBellContent() {
   const queryClient = useQueryClient();
 
@@ -40,7 +55,7 @@ function NotificationBellContent() {
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      const unreadNotifications = notifications.filter(n => !n.is_read);
+      const unreadNotifications = notifications.filter(n => !notifIsRead(n));
       await Promise.all(
         unreadNotifications.map(n => base44.entities.Notification.update(n.id, { is_read: true }))
       );
@@ -50,14 +65,15 @@ function NotificationBellContent() {
     },
   });
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter(n => !notifIsRead(n)).length;
 
   const handleNotificationClick = (notification) => {
-    if (!notification.is_read) {
+    if (!notifIsRead(notification)) {
       markAsReadMutation.mutate(notification.id);
     }
-    if (notification.action_url) {
-      window.location.href = notification.action_url;
+    const actionUrl = notifActionUrl(notification);
+    if (actionUrl) {
+      window.location.href = actionUrl;
     }
   };
 
@@ -113,7 +129,7 @@ function NotificationBellContent() {
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`w-full p-4 text-left hover:bg-slate-50 transition-colors ${
-                    !notification.is_read ? 'bg-blue-50' : ''
+                    !notifIsRead(notification) ? 'bg-blue-50' : ''
                   }`}
                 >
                   <div className="flex gap-3">
@@ -122,10 +138,10 @@ function NotificationBellContent() {
                       <p className="text-sm font-medium text-slate-900">{notification.title}</p>
                       <p className="text-xs text-slate-600 mt-1">{notification.message}</p>
                       <p className="text-xs text-slate-400 mt-1">
-                        {formatDistanceToNow(new Date(notification.created_date), { addSuffix: true })}
+                        {safeRelativeTime(notifCreatedAt(notification))}
                       </p>
                     </div>
-                    {!notification.is_read && (
+                    {!notifIsRead(notification) && (
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                     )}
                   </div>
