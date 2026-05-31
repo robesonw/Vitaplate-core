@@ -311,7 +311,7 @@ export default function Dashboard() {
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link to={createPageUrl('Index')}>
+          <Link to="/">
             🏠 Home Page
           </Link>
         </Button>
