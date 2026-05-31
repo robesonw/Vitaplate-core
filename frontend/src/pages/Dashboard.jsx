@@ -200,30 +200,31 @@ export default function Dashboard() {
   // Generate recent activity from actual data
   const recentActivity = React.useMemo(() => {
     const activities = [];
-    
+
+    const relativeDayText = (value) => {
+      if (value == null || value === '') return '';
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysAgo < 0) return 'Today';
+      return daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
+    };
+
     // Add meal plan activities
     mealPlans.slice(0, 3).forEach(plan => {
-      const date = new Date(plan.created_date);
-      const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-      const timeText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
-      
       activities.push({
         action: 'Created meal plan',
         plan: plan.name,
-        time: timeText
+        time: relativeDayText(plan.created_date ?? plan.createdDate)
       });
     });
-    
+
     // Add lab result if exists
     if (labResults.length > 0) {
-      const date = new Date(labResults[0].upload_date);
-      const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-      const timeText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
-      
       activities.push({
         action: 'Uploaded lab results',
         plan: 'Health tracking',
-        time: timeText
+        time: relativeDayText(labResults[0].upload_date ?? labResults[0].uploadDate)
       });
     }
     

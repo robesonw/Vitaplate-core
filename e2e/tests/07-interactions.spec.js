@@ -8,9 +8,16 @@ import {
 const CRASH_PATTERNS =
   /Minified React error|not valid as a React child|Cannot read propert|is not a function|is not defined|Maximum update depth|Rendered fewer hooks|Objects are not valid/i;
 
+// Expected, non-crash app messages (paywalls, rate limits) that surface as
+// thrown errors but are correct product behavior — never treat as failures.
+const EXPECTED_NON_CRASH =
+  /free messages|Upgrade to Pro|rate limit|too many requests|quota/i;
+
 function attachErrorCollectors(page) {
   const collected = { pageErrors: [], reactErrors: [] };
-  page.on('pageerror', (err) => collected.pageErrors.push(err.message));
+  page.on('pageerror', (err) => {
+    if (!EXPECTED_NON_CRASH.test(err.message)) collected.pageErrors.push(err.message);
+  });
   page.on('console', (msg) => {
     if (msg.type() === 'error' && CRASH_PATTERNS.test(msg.text())) collected.reactErrors.push(msg.text());
   });
